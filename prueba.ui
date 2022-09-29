@@ -37,26 +37,10 @@
      </property>
     </column>
    </widget>
-   <widget class="QPushButton" name="btnI1">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>20</y>
-      <width>101</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(85, 170, 0);</string>
-    </property>
-    <property name="text">
-     <string>Iniciar FCFS</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btnI2">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>220</x>
       <y>20</y>
       <width>101</width>
       <height>23</height>
@@ -66,7 +50,7 @@
      <string notr="true">background-color: rgb(85, 170, 0);</string>
     </property>
     <property name="text">
-     <string>Iniciar RR</string>
+     <string>Iniciar Multicolas</string>
     </property>
    </widget>
    <widget class="QTableWidget" name="tablaRR">
@@ -95,9 +79,9 @@
    <widget class="QTableWidget" name="tablaSJF">
     <property name="geometry">
      <rect>
-      <x>530</x>
+      <x>540</x>
       <y>70</y>
-      <width>256</width>
+      <width>221</width>
       <height>331</height>
      </rect>
     </property>

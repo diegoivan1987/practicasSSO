@@ -16,7 +16,7 @@ class HiloSJF(QtCore.QThread):
 		contadorProcesosFinalizados = 0
 		self.ordenaProcesos(self.colaProcesosSJF)
 		self.senialActualizarOrden.emit(1)
-		time.sleep(0.005)#para que se alcancen a reflejar los cambios en la interfaz
+		time.sleep(0.01)#para que se alcancen a reflejar los cambios en la interfaz
 		#no se termina hasta que se hayan terminado todos los pr
 		# ocesos
 		while contadorProcesosFinalizados < len(self.colaProcesosSJF):
@@ -24,10 +24,11 @@ class HiloSJF(QtCore.QThread):
 			for i in range(len(self.colaProcesosSJF)):
 				if randint(1,10)==1:
 					agregar = Proceso(len(self.colaProcesosSJF)+1,randint(1,10))
+					print("Se creo el proceso "+str(agregar.id))
 					self.colaProcesosSJF.append(agregar)
 					self.ordenaProcesos(self.colaProcesosSJF)
 					self.senialActualizarOrden.emit(1)
-					time.sleep(0.005)#para que se alcancen a reflejar los cambios en la interfaz
+					time.sleep(0.01)#para que se alcancen a reflejar los cambios en la interfaz
 
 				if self.colaProcesosSJF[i].banderaTerminado == False:#si aun no termina, sigue trabajando con el proceso
 					for j in range(self.colaProcesosSJF[i].tiempoEstimado):#mientras no se haya terminado el proceso o la cota de tiempo
@@ -37,10 +38,10 @@ class HiloSJF(QtCore.QThread):
 							self.colaProcesosSJF[i].banderaTerminado = True#lo marcamos como terminado
 							contadorProcesosFinalizados += 1#aumentamos el contador de procesos terminados
 							self.senialActualizarTiempo.emit(i)
-							time.sleep(0.001)#para que se alcancen a reflejar los cambios en la interfaz
+							time.sleep(0.01)#para que se alcancen a reflejar los cambios en la interfaz
 							break#interrumpimos la duracion de la cota de tiempo
 						self.senialActualizarTiempo.emit(i)		
-		print("se termino el procesamiento")#ayuda para saber si termino el bucle
+		print("se termino el procesamiento SJF")#ayuda para saber si termino el bucle
 		self.quit()
 
 	def ordenaProcesos(self,colaProcesosSJF=[]):
@@ -50,40 +51,6 @@ class HiloSJF(QtCore.QThread):
 					temp = colaProcesosSJF[i]
 					colaProcesosSJF[i] = self.colaProcesosSJF[i+1]
 					colaProcesosSJF[i+1] = temp
-
-class HiloFCFS(QtCore.QThread):
-	senialBloqueo = QtCore.pyqtSignal(int)
-	senialActualizar = QtCore.pyqtSignal(int)
-	def __init__(self, colaProcesosFCFS = []):
-		super(HiloFCFS, self).__init__(None)
-		self.colaProcesosFCFS = colaProcesosFCFS
-	
-	#se inicia o continua el proceso
-	def run(self):
-		contadorProcesosFinalizados = 0
-		#no se termina hasta que se hayan terminado todos los procesos
-		while contadorProcesosFinalizados <10:
-			#recorremos el arreglo de procesos
-			for i in range(10):
-				if self.colaProcesosFCFS[i].banderaTerminado == False:#si aun no termina, sigue trabajando con el proceso
-					while (self.colaProcesosFCFS[i].porcentajeProcesado<100):#mientras no se haya terminado el proceso
-						if randint(1,5)==5 and i>0:#interrumpimos un proceso con un 20% de probabilidad, simulando una bloqueo por E/S
-							#primero mandamos la señal para que haya un cambio en la interfaz y luego procesamos la lista, ya que hay un cambio de indices
-							self.senialBloqueo.emit(i)
-							time.sleep(0.008)#para que se puedan terminar los cambios en la interfaz
-							self.agregar = self.colaProcesosFCFS[i]
-							self.colaProcesosFCFS.append(self.agregar)#lo pasamos al final de la fila
-							del self.colaProcesosFCFS[i]#lo eliminamos de la posicion original que ocupaba
-							i-=1#regresamos el indice para no saltarnos el siguiente proceso al que se elimino
-						else:#si no hubo un bloqueo
-							#actualizamos el porcentaje en la tabla
-							self.colaProcesosFCFS[i].porcentajeProcesado+=1#aumentamos su porcentaje
-							if self.colaProcesosFCFS[i].porcentajeProcesado == 100:#si se completo durante este ciclo
-								self.colaProcesosFCFS[i].banderaTerminado = True#lo marcamos como terminado
-								contadorProcesosFinalizados += 1#aumentamos el contador de procesos terminados
-							self.senialActualizar.emit(i)#aqui no se hace primero porque no hay un cambio de indides en la lista
-							time.sleep(0.01)				
-		print("se termino el procesamiento")#ayuda para saber si termino el bucle
 
 class HiloRR(QtCore.QThread):
 	senialActualizarRR = QtCore.pyqtSignal(int)
@@ -97,8 +64,9 @@ class HiloRR(QtCore.QThread):
 	#se inicia o continua el proceso
 	def run(self):
 		contadorProcesosFinalizados = 0
+		contadorFCFS = 0
 		#no se termina hasta que se hayan terminado todos los procesos
-		while contadorProcesosFinalizados <(len(self.colaProcesosFCFS)+len(self.colaProcesosRR)):
+		while contadorProcesosFinalizados <(len(self.colaProcesosRR)):
 			#recorremos el arreglo de procesos
 			for i in range(len(self.colaProcesosRR)):
 				if self.colaProcesosRR[i].banderaTerminado == False:#si aun no termina, sigue trabajando con el proceso
@@ -109,34 +77,66 @@ class HiloRR(QtCore.QThread):
 							self.colaProcesosRR[i].banderaTerminado = True#lo marcamos como terminado
 							contadorProcesosFinalizados += 1#aumentamos el contador de procesos terminados
 							self.senialActualizarRR.emit(i)
-							time.sleep(0.001)#para que se alcancen a reflejar los cambios en la interfaz
+							time.sleep(0.005)#para que se alcancen a reflejar los cambios en la interfaz
 							break#interrumpimos la duracion de la cota de tiempo
 						self.senialActualizarRR.emit(i)
 						if(i>0 and randint(1,3)==2):
 							print("bloqueo en "+str(self.colaProcesosRR[i].id))
-							#primero mandamos la señal para que haya un cambio en la interfaz y luego procesamos la lista, ya que hay un cambio de indices
-							self.senialBloqueoRR.emit(i)
-							time.sleep(0.008)#para que se puedan terminar los cambios en la interfaz
-							self.agregar = self.colaProcesosRR[i]
-							self.colaProcesosRR.append(self.agregar)#lo pasamos al final de la fila
-							del self.colaProcesosRR[i]#lo eliminamos de la posicion original que ocupaba
-							i-=1#regresamos el indice para no saltarnos el siguiente proceso al que se elimino
-							cuentaTiempoDeFCFS = 0
-							while cuentaTiempoDeFCFS <300:
-								#recorremos el arreglo de procesos
-								for x in range(len(self.colaProcesosFCFS)):
-									print(str(x)+" "+str(cuentaTiempoDeFCFS))
-									if self.colaProcesosFCFS[x].banderaTerminado == False and cuentaTiempoDeFCFS <300:#si aun no termina, sigue trabajando con el proceso
-										while (self.colaProcesosFCFS[x].porcentajeProcesado<100):#mientras no se haya terminado el proceso
-											#actualizamos el porcentaje en la tabla
-											self.colaProcesosFCFS[x].porcentajeProcesado+=1#aumentamos su porcentaje
-											cuentaTiempoDeFCFS +=1
-											if self.colaProcesosFCFS[x].porcentajeProcesado == 100:#si se completo durante este ciclo
-												self.colaProcesosFCFS[x].banderaTerminado = True#lo marcamos como terminado
-												contadorProcesosFinalizados += 1#aumentamos el contador de procesos terminados
-												print("Termino proceso "+str(self.colaProcesosFCFS[x].id)+" "+str(self.colaProcesosFCFS[x].porcentajeProcesado))
-											self.senialActualizarFCFS.emit(x)#aqui no se hace primero porque no hay un cambio de indides en la lista
-											time.sleep(0.01)
+							if contadorFCFS == 0:
+								while (self.colaProcesosFCFS[0].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[0].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(0)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[1].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[1].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(1)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[2].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[2].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(2)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								contadorFCFS = 1
+							elif contadorFCFS == 1:
+								while (self.colaProcesosFCFS[3].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[3].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(3)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[4].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[4].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(4)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[5].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[5].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(5)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								contadorFCFS = 2
+							elif contadorFCFS == 2:
+								while (self.colaProcesosFCFS[6].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[6].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(6)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[7].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[7].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(7)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								while (self.colaProcesosFCFS[8].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[8].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(8)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								contadorFCFS = 3
+							elif contadorFCFS == 3:
+								while (self.colaProcesosFCFS[9].porcentajeProcesado<100):#mientras no se haya terminado el proceso
+									self.colaProcesosFCFS[9].porcentajeProcesado+=1#aumentamos su porcentaje
+									self.senialActualizarFCFS.emit(9)#aqui no se hace primero porque no hay un cambio de indides en la lista
+									time.sleep(0.01)	
+								print("se termino el procesamiento de FCFS")#ayuda para saber si termino el bucle
+							#contador = 0
+							#for ax in range(len(self.colaProcesosFCFS)):
+							#	if self.colaProcesosFCFS[ax].banderaTerminado == False and contador < 3:
+							#		self.colaProcesosFCFS[ax].banderaTerminado = True
+							#		self.colaProcesosFCFS[ax].porcentajeProcesado = 100
+							#		self.senialActualizarFCFS.emit(ax)
+							#		contador +=1
 							break;
 							
 										
@@ -189,8 +189,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 			tablaPorcentaje = QtWidgets.QTableWidgetItem(str(self.colaProcesosSJF[i].tiempoEstimado))
 			self.tablaSJF.setItem(i,0,tablaId)
 			self.tablaSJF.setItem(i,1,tablaPorcentaje)
-
-		self.btnI1.clicked.connect(self.iniciaFCFS)
+			
 		self.btnI2.clicked.connect(self.iniciaRR)
 		self.btnI3.clicked.connect(self.iniciaSJF)
 
