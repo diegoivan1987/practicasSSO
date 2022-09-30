@@ -128,7 +128,8 @@ class HiloRR(QtCore.QThread):
 								while (self.colaProcesosFCFS[9].porcentajeProcesado<100):#mientras no se haya terminado el proceso
 									self.colaProcesosFCFS[9].porcentajeProcesado+=1#aumentamos su porcentaje
 									self.senialActualizarFCFS.emit(9)#aqui no se hace primero porque no hay un cambio de indides en la lista
-									time.sleep(0.01)	
+									time.sleep(0.01)
+									contadorFCFS = 4	
 								print("se termino el procesamiento de FCFS")#ayuda para saber si termino el bucle
 							#contador = 0
 							#for ax in range(len(self.colaProcesosFCFS)):
@@ -166,9 +167,11 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(10):
 			agregar = Proceso(i+1,randint(1,10))
+			agregar2 = Proceso(i+1,randint(1,10))
+			agregar3 = Proceso(i+1,randint(1,10))
 			self.colaProcesosFCFS.append(agregar)
-			self.colaProcesosRR.append(agregar)
-			self.colaProcesosSJF.append(agregar)
+			self.colaProcesosRR.append(agregar2)
+			self.colaProcesosSJF.append(agregar3)
 
 		#inicializamos los datos de las tablas
 		for i in range(10):
