@@ -52,6 +52,59 @@ class HiloSJF(QtCore.QThread):
 					colaProcesosSJF[i] = self.colaProcesosSJF[i+1]
 					colaProcesosSJF[i+1] = temp
 
+class Productor(QtCore.QThread):
+	mutex = QtCore.QMutex()
+
+	def __init__(self, tamanoArreglo, tamanoMaximo,procesosAgregados, parar, arreglo):
+		super(Productor, self).__init__(None)
+		self.tamanoArreglo = tamanoArreglo
+		self.tamanoMaximo = tamanoMaximo
+		self.procesosAgregados = procesosAgregados
+		self.parar = parar
+		self.arreglo = arreglo
+	
+	#se inicia o continua el proceso
+	def run(self):
+		print("Inicio productor")
+		if self.parar == 0:
+			agregar = Proceso(len(self.arreglo)+1,1)
+			if self.tamanoArreglo < self.tamanoMaximo:
+				self.mutex.lock()
+				self.arreglo.append(agregar)
+				self.tamanoArreglo += 1
+				self.procesosAgregados += 1
+				print("Se agrego "+str(agregar.id))
+				self.mutex.unlock()
+
+class Consumidor(QtCore.QThread):
+	mutex = QtCore.QMutex()
+
+	def __init__(self, tamanoArreglo, tamanoMaximo,procesosAgregados, parar, arreglo):
+		super(Consumidor, self).__init__(None)
+		self.tamanoArreglo = tamanoArreglo
+		self.tamanoMaximo = tamanoMaximo
+		self.procesosAgregados = procesosAgregados
+		self.parar = parar
+		self.arreglo = arreglo
+	
+	#se inicia o continua el proceso
+	def run(self):
+		print("Inicio consumidor")
+		if self.parar == 0:
+			print("Tamanio "+str(len(self.arreglo)))
+			if self.tamanoArreglo > 0:
+				print("Entro a tamanio arreglo")
+				self.mutex.lock()
+				actual = self.arreglo.pop(0)
+				actual.banderaTerminado = True
+				print("Se proceso "+str(actual.id))
+				self.tamanoArreglo -= 1
+				if self.procesosAgregados == 20:
+					self.parar  = 1
+				self.mutex.unlock()
+
+
+
 class HiloRR(QtCore.QThread):
 	senialActualizarRR = QtCore.pyqtSignal(int)
 	senialBloqueoRR = QtCore.pyqtSignal(int)
@@ -160,6 +213,14 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
+		self.tamanoArreglo = 0
+		self.tamanoMaximo = 10
+		self.procesosAgregados = 0
+		self.parar = 0
+		self.arreglo = []
+		
+
+		
 		self.colaProcesosFCFS = []
 		self.colaProcesosRR = []
 		self.colaProcesosSJF = []
@@ -193,8 +254,17 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 			self.tablaSJF.setItem(i,0,tablaId)
 			self.tablaSJF.setItem(i,1,tablaPorcentaje)
 			
-		self.btnI2.clicked.connect(self.iniciaRR)
+		self.btnI2.clicked.connect(self.correr)
 		self.btnI3.clicked.connect(self.iniciaSJF)
+
+	def correr(self):
+		self.productor = Productor(self.tamanoArreglo, self.tamanoMaximo, self.procesosAgregados, self.parar, self.arreglo)
+		self.consumidor = Consumidor(self.tamanoArreglo, self.tamanoMaximo, self.procesosAgregados, self.parar, self.arreglo)
+		self.productor.start()
+		time.sleep(0.5)
+		self.consumidor.start()
+		
+
 
 	#para reordenar la tabla como si fuera una fila
 	def reordenarTablaFCFS(self,senial):
