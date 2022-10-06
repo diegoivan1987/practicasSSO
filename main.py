@@ -53,55 +53,44 @@ class HiloSJF(QtCore.QThread):
 					colaProcesosSJF[i+1] = temp
 
 class Productor(QtCore.QThread):
-	mutex = QtCore.QMutex()
+	
 
-	def __init__(self, tamanoArreglo, tamanoMaximo,procesosAgregados, parar, arreglo):
+	def __init__(self,mutex,contador,banderaProductor,banderaConsumidor):
 		super(Productor, self).__init__(None)
-		self.tamanoArreglo = tamanoArreglo
-		self.tamanoMaximo = tamanoMaximo
-		self.procesosAgregados = procesosAgregados
-		self.parar = parar
-		self.arreglo = arreglo
-	
+		self.mutex = QtCore.QMutex()
+		self.contador = contador
+		self.banderaProductor = banderaProductor
+		self.banderaConsumidor = banderaConsumidor
+		
+				
+
+class ProductorConsumidor(QtCore.QThread):
+
+	def __init__(self,mutex,contador,opcion):
+		super(ProductorConsumidor, self).__init__(None)
+		self.mutex = mutex
+		self.contador = contador
+		self.opcion = opcion
+		
 	#se inicia o continua el proceso
 	def run(self):
-		print("Inicio productor")
-		if self.parar == 0:
-			agregar = Proceso(len(self.arreglo)+1,1)
-			if self.tamanoArreglo < self.tamanoMaximo:
-				self.mutex.lock()
-				self.arreglo.append(agregar)
-				self.tamanoArreglo += 1
-				self.procesosAgregados += 1
-				print("Se agrego "+str(agregar.id))
-				self.mutex.unlock()
-
-class Consumidor(QtCore.QThread):
-	mutex = QtCore.QMutex()
-
-	def __init__(self, tamanoArreglo, tamanoMaximo,procesosAgregados, parar, arreglo):
-		super(Consumidor, self).__init__(None)
-		self.tamanoArreglo = tamanoArreglo
-		self.tamanoMaximo = tamanoMaximo
-		self.procesosAgregados = procesosAgregados
-		self.parar = parar
-		self.arreglo = arreglo
+		while True:
+			self.mutex.lock()
+			if self.opcion == 1:
+				self.producir(self.contador)
+			elif self.opcion == 2:
+				self.consumir(self.contador)
+			self.mutex.unlock()
 	
-	#se inicia o continua el proceso
-	def run(self):
-		print("Inicio consumidor")
-		if self.parar == 0:
-			print("Tamanio "+str(len(self.arreglo)))
-			if self.tamanoArreglo > 0:
-				print("Entro a tamanio arreglo")
-				self.mutex.lock()
-				actual = self.arreglo.pop(0)
-				actual.banderaTerminado = True
-				print("Se proceso "+str(actual.id))
-				self.tamanoArreglo -= 1
-				if self.procesosAgregados == 20:
-					self.parar  = 1
-				self.mutex.unlock()
+	def consumir(self,contador):
+		contador[0] -= 1
+		print("Consume "+str(contador[0]))
+
+	def producir(self,contador):
+		contador[0]+= 1
+		print("Produce "+str(contador[0]))
+		
+				
 
 
 
@@ -213,11 +202,11 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
-		self.tamanoArreglo = 0
 		self.tamanoMaximo = 10
 		self.procesosAgregados = 0
 		self.parar = 0
 		self.arreglo = []
+		self.mutex = QtCore.QMutex()
 		
 
 		
@@ -258,10 +247,11 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.btnI3.clicked.connect(self.iniciaSJF)
 
 	def correr(self):
-		self.productor = Productor(self.tamanoArreglo, self.tamanoMaximo, self.procesosAgregados, self.parar, self.arreglo)
-		self.consumidor = Consumidor(self.tamanoArreglo, self.tamanoMaximo, self.procesosAgregados, self.parar, self.arreglo)
+		self.contador = [0]
+		self.mutex = QtCore.QMutex()
+		self.productor = ProductorConsumidor(self.mutex,self.contador,1)
+		self.consumidor = ProductorConsumidor(self.mutex,self.contador,2)
 		self.productor.start()
-		time.sleep(0.5)
 		self.consumidor.start()
 		
 
