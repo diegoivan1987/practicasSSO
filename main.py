@@ -7,6 +7,8 @@ import sys, time
 
 class ProductorConsumidor(QtCore.QThread):
 	senial = QtCore.pyqtSignal(list)
+	senialQuitar = QtCore.pyqtSignal(int)
+	senialAgregar = QtCore.pyqtSignal(int)
 
 	def __init__(self,mutex,dato,ocupados,opcion,repeticiones,banderaProductor,banderaConsumidor):
 		super(ProductorConsumidor, self).__init__(None)
@@ -22,20 +24,22 @@ class ProductorConsumidor(QtCore.QThread):
 	def run(self):
 		while self.repeticiones[0]<20:
 			self.mutex.lock()
-			print("repeticion "+str(self.repeticiones[0]))
+			#print("repeticion "+str(self.repeticiones[0]))
 			if self.opcion == 1:
 				if self.banderaProductor[0] == 1:
 					if self.repeticiones[0] < 20:
 						self.producir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
+						self.senialQuitar.emit(0)
 			elif self.opcion == 2:
 				if self.banderaConsumidor[0] == 1:
 					self.consumir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
+					self.senialAgregar.emit(0)
 			self.mutex.unlock()
 	
 
 	def producir(self,dato,ocupado,repeticiones,banderaProductor,banderaConsumidor,senial):
 		dato[0]+= 1
-		print("Produce "+str(dato[0]))
+		#print("Produce "+str(dato[0]))
 		senial.emit([dato[0]-1,1])
 		time.sleep(0.1)
 		ocupado[0] +=1 
@@ -45,7 +49,7 @@ class ProductorConsumidor(QtCore.QThread):
 
 	def consumir(self,dato,ocupado,repeticiones,banderaProductor,banderaConsumidor,senial):
 		dato[0] -= 1
-		print("Consume "+str(dato[0]))
+		#print("Consume "+str(dato[0]))
 		senial.emit([dato[0],2])
 		time.sleep(0.1)
 		repeticiones[0] +=1
@@ -71,12 +75,13 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
-		self.colaProcesosFCFS = []
+		self.colaPendientes = []
+		self.colaTerminados = []
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(20):
 			agregar = Proceso(i+1,randint(1,10))
-			self.colaProcesosFCFS.append(agregar)
+			self.colaPendientes.append(agregar)
 
 		#inicializamos los datos de las tablas
 		for i in range(10):
@@ -86,8 +91,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 			self.tablaProcesos.setItem(0,i,columna)
 
 		for i in range(20):
-			self.tablaPendientes.addRow()
-			agregar = QtGui.QTableWidgetItem("Proceso "+str(self.colaProcesosFCFS[i]))
+			self.tablaPendientes.insertRow(self.tablaPendientes.rowCount())
+			agregar = QtWidgets.QTableWidgetItem("Proceso "+str(self.colaPendientes[i].id))
+			self.tablaPendientes.setItem(i,0,agregar)
 			
 		self.btnI.clicked.connect(self.correr)
 
@@ -101,7 +107,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = ProductorConsumidor(self.mutex,self.dato,self.ocupados,1,self.repeticiones,self.banderaProductor,self.banderaConsumidor)
 		self.consumidor = ProductorConsumidor(self.mutex,self.dato,self.ocupados,2,self.repeticiones,self.banderaProductor,self.banderaConsumidor)
 		self.productor.senial.connect(self.socketPintaSector)
+		self.productor.senialQuitar.connect(self.quitaDeTabla)
 		self.consumidor.senial.connect(self.socketPintaSector)
+		self.consumidor.senialAgregar.connect(self.aniadirATabla)
 		self.productor.start()
 		self.consumidor.start()
 		
@@ -114,7 +122,17 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		columna.setBackground(color)
 		self.tablaProcesos.setItem(0,senial[0],columna)
 			
-	
+	def quitaDeTabla(self,senial):
+		self.tablaPendientes.removeRow(senial)
+		agregar = self.colaPendientes.pop(senial)
+		self.colaTerminados.append(agregar)
+
+	def aniadirATabla(self,senial):
+		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
+		proceso = self.colaTerminados.pop(senial)
+		print("Se agrego "+str(proceso.id))
+		agregar = QtWidgets.QTableWidgetItem("Proceso "+str(proceso.id))
+		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,agregar)
 
 #Iniciamos la aplicacion en bucle
 app = QtWidgets.QApplication(sys.argv)
