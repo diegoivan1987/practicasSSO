@@ -7,40 +7,94 @@
     <x>0</x>
     <y>0</y>
     <width>803</width>
-    <height>487</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="tablaFCFS">
+   <widget class="QTableWidget" name="tablaProcesos">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>256</width>
-      <height>331</height>
+      <x>20</x>
+      <y>50</y>
+      <width>751</width>
+      <height>71</height>
      </rect>
     </property>
-    <property name="columnCount">
-     <number>2</number>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
+    <property name="columnCount">
+     <number>10</number>
+    </property>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>75</number>
+    </attribute>
+    <row>
+     <property name="text">
+      <string/>
+     </property>
+    </row>
     <column>
      <property name="text">
-      <string>ID</string>
+      <string>1</string>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>Porcentaje</string>
+      <string>2</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>3</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>4</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>5</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>6</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>7</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>8</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>9</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>10</string>
      </property>
     </column>
    </widget>
-   <widget class="QPushButton" name="btnI2">
+   <widget class="QPushButton" name="btnI">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>330</x>
       <y>20</y>
       <width>101</width>
       <height>23</height>
@@ -50,69 +104,79 @@
      <string notr="true">background-color: rgb(85, 170, 0);</string>
     </property>
     <property name="text">
-     <string>Iniciar Multicolas</string>
+     <string>Iniciar</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="tablaRR">
+   <widget class="QTableWidget" name="tablaPendientes">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>70</y>
-      <width>256</width>
-      <height>331</height>
-     </rect>
-    </property>
-    <property name="columnCount">
-     <number>2</number>
-    </property>
-    <column>
-     <property name="text">
-      <string>ID</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Tiempo(s)</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QTableWidget" name="tablaSJF">
-    <property name="geometry">
-     <rect>
-      <x>540</x>
-      <y>70</y>
-      <width>221</width>
-      <height>331</height>
-     </rect>
-    </property>
-    <property name="columnCount">
-     <number>2</number>
-    </property>
-    <column>
-     <property name="text">
-      <string>ID</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Tiempo(s)</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QPushButton" name="btnI3">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>20</y>
+      <x>40</x>
+      <y>190</y>
       <width>101</width>
+      <height>321</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tablaTerminados">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>190</y>
+      <width>101</width>
+      <height>321</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>220</y>
+      <width>411</width>
       <height>23</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(85, 170, 0);</string>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>160</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
     </property>
     <property name="text">
-     <string>Iniciar JSF</string>
+     <string>Pendientes</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>170</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Terminado</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblProceso">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>190</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>lblProceso</string>
     </property>
    </widget>
   </widget>
