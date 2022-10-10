@@ -5,6 +5,8 @@ from PyQt5.QtGui import  QColor
 from PyQt5 import uic
 import sys, time
 
+from matplotlib.pyplot import text
+
 #dependiendo de la opcion pasada en los parametros sera si es productor o consumidor
 class ProductorConsumidor(QtCore.QThread):
 	senial = QtCore.pyqtSignal(list)#señal que indica si quita o agrega al arreglo de procesos y que proceso es
@@ -59,6 +61,20 @@ class ProductorConsumidor(QtCore.QThread):
 			banderaProductor[0] = 1
 			banderaConsumidor[0] = 0
 
+class lectorEscritor(QtCore.QThread):
+	palabraLectura = QtCore.pyqtSignal(list)#mandara una palabra al cuadro de lectura
+
+	def __init__(self,argumentos):
+		super(lectorEscritor, self).__init__(None)
+		self.argumentos = argumentos
+		
+	#se inicia o continua el proceso
+	def run(self):
+		palabras = str.split(self.argumentos["variableTexto"],"\n")
+		for palabra in palabras:
+			self.palabraLectura.emit([palabra,self.argumentos["indice"]])
+			time.sleep(1)
+
 class Proceso():
 		id = 0
 		porcentajeProcesado = 0
@@ -76,27 +92,33 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
-		self.colaPendientes = []
-		self.colaTerminados = []
+		self.argumentos = {"variableTexto":"Autómata\nSalvajes\nArtificio\nHipócritas\nClon\nPrimitivos\nEntelequia\nRacistas\nAnatema\nIntolerantes\n"}
 
-		#inicializamos los arreglos de procesos y sus datos
-		for i in range(20):
-			agregar = Proceso(i+1,randint(1,10))
-			self.colaPendientes.append(agregar)
+		self.txtE1.setPlainText(self.argumentos["variableTexto"])
+		self.txtE2.setPlainText(self.argumentos["variableTexto"])
 
-		#inicializamos los datos de las tablas
-		for i in range(10):
-			columna = QtWidgets.QTableWidgetItem("")
-			color = QColor(124,252,0)
-			columna.setBackground(color)
-			self.tablaProcesos.setItem(0,i,columna)
+		self.txtE1.setEnabled(False)
+		self.txtE2.setEnabled(False)
+		self.txtL1.setEnabled(False)
+		self.txtL2.setEnabled(False)
 
-		for i in range(20):
-			self.tablaPendientes.insertRow(self.tablaPendientes.rowCount())
-			agregar = QtWidgets.QTableWidgetItem("Proceso "+str(self.colaPendientes[i].id))
-			self.tablaPendientes.setItem(i,0,agregar)
+		self.escritoresIndexados = [self.txtE1,self.txtE2]
+		self.lectoresIndexados = [self.txtL1,self.txtL2]
 			
-		self.btnI.clicked.connect(self.correr)
+		self.btnIL1.clicked.connect(lambda: self.inicioLector(0))
+		self.btnIL2.clicked.connect(lambda: self.inicioLector(1))
+
+	def inicioLector(self,indice):
+		self.argumentos["indice"] = indice
+		self.hiloLector = lectorEscritor(self.argumentos)
+		self.hiloLector.palabraLectura.connect(self.socketLector)
+		self.hiloLector.start()
+	
+	def socketLector(self,senial):
+		self.texto = self.lectoresIndexados[senial[1]].toPlainText()
+		self.texto = self.texto + "\n"+ senial[0]
+		self.lectoresIndexados[senial[1]].setPlainText(self.texto)
+
 
 	def correr(self):
 		self.dato = [0]
