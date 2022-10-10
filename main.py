@@ -5,32 +5,33 @@ from PyQt5.QtGui import  QColor
 from PyQt5 import uic
 import sys, time
 
+#dependiendo de la opcion pasada en los parametros sera si es productor o consumidor
 class ProductorConsumidor(QtCore.QThread):
-	senial = QtCore.pyqtSignal(list)
-	senialQuitar = QtCore.pyqtSignal(int)
-	senialAgregar = QtCore.pyqtSignal(int)
+	senial = QtCore.pyqtSignal(list)#señal que indica si quita o agrega al arreglo de procesos y que proceso es
+	senialQuitar = QtCore.pyqtSignal(int)#para quitar procesos de la tabla de pendientes al cargarlo al buffer(producir)
+	senialAgregar = QtCore.pyqtSignal(int)#para agregar procesos de la tabla de terminados al quitarlo del buffer(consumir)
 
 	def __init__(self,mutex,dato,ocupados,opcion,repeticiones,banderaProductor,banderaConsumidor):
 		super(ProductorConsumidor, self).__init__(None)
 		self.mutex = mutex
 		self.dato = dato
-		self.opcion = opcion
-		self.repeticiones = repeticiones
-		self.banderaProductor = banderaProductor
-		self.banderaConsumidor = banderaConsumidor
-		self.ocupados = ocupados
+		self.opcion = opcion#indicara si es productor o consumidor
+		self.repeticiones = repeticiones#numero total de veces que se ha consumido un proceso
+		self.banderaProductor = banderaProductor#bandera para hacer trabajar al productor
+		self.banderaConsumidor = banderaConsumidor#bandera para hacer trabajar al consumidor
+		self.ocupados = ocupados#espacios ocupados en el buffer
 		
 	#se inicia o continua el proceso
 	def run(self):
 		while self.repeticiones[0]<20:
 			self.mutex.lock()
 			#print("repeticion "+str(self.repeticiones[0]))
-			if self.opcion == 1:
+			if self.opcion == 1:#productor
 				if self.banderaProductor[0] == 1:
 					if self.repeticiones[0] < 20:
 						self.producir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
 						self.senialQuitar.emit(0)
-			elif self.opcion == 2:
+			elif self.opcion == 2:#consumidor
 				if self.banderaConsumidor[0] == 1:
 					self.consumir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
 					self.senialAgregar.emit(0)
