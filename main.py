@@ -64,7 +64,7 @@ class ProductorConsumidor(QtCore.QThread):
 class lectorEscritor(QtCore.QThread):
 	palabraLectura = QtCore.pyqtSignal(str)#mandara una palabra al cuadro de lectura
 
-	def __init__(self,texto,argumentos,cuadroDeEscritura = QtGui.QPlainTextEdit):
+	def __init__(self,texto,argumentos,cuadroDeEscritura):
 		super(lectorEscritor, self).__init__(None)
 		self.texto = texto
 		self.argumentos = argumentos
@@ -117,7 +117,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.btnIL1.clicked.connect(self.inicioLector1)
 		self.btnIL2.clicked.connect(self.inicioLector2)
 		self.btnIE1.clicked.connect(self.inicioEscritor1)
-		self.btnIE1.clicked.connect(self.pararEscritor1)
+		self.btnPE1.clicked.connect(self.pararEscritor1)
+		self.btnIE2.clicked.connect(self.inicioEscritor1)
+		self.btnPE2.clicked.connect(self.pararEscritor1)
 
 		self.argumentosEscritor = {"opcion":"escritor"}
 		self.hiloEscritor1 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE1)
@@ -125,10 +127,19 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 	def inicioEscritor1(self):
 		self.hiloEscritor1.start()
+	
+	def pararEscritor1(self):
+		self.hiloEscritor1.stop()
+
+	def inicioEscritor2(self):
+		self.hiloEscritor2.start()
+	
+	def pararEscritor2(self):
+		self.hiloEscritor2.stop()
 
 	def inicioLector1(self):
 		self.argumentos = {"opcion":"lector"}
-		self.hiloLector = lectorEscritor(self.texto,self.argumentos)
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtE1)
 		self.hiloLector.palabraLectura.connect(self.socketLector1)
 		self.hiloLector.start()
 	
@@ -140,7 +151,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 	def inicioLector2(self):
 		self.argumentos = {"opcion":"lector"}
-		self.hiloLector = lectorEscritor(self.texto,self.argumentos)
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtE1)
 		self.hiloLector.palabraLectura.connect(self.socketLector2)
 		self.hiloLector.start()
 	
