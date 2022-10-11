@@ -62,18 +62,30 @@ class ProductorConsumidor(QtCore.QThread):
 			banderaConsumidor[0] = 0
 
 class lectorEscritor(QtCore.QThread):
-	palabraLectura = QtCore.pyqtSignal(list)#mandara una palabra al cuadro de lectura
+	palabraLectura = QtCore.pyqtSignal(str)#mandara una palabra al cuadro de lectura
 
-	def __init__(self,argumentos):
+	def __init__(self,texto,argumentos,cuadroDeEscritura = QtGui.QPlainTextEdit):
 		super(lectorEscritor, self).__init__(None)
+		self.texto = texto
 		self.argumentos = argumentos
+		self.cuadroDeEscritura = cuadroDeEscritura
 		
 	#se inicia o continua el proceso
 	def run(self):
-		palabras = str.split(self.argumentos["variableTexto"],"\n")
-		for palabra in palabras:
-			self.palabraLectura.emit([palabra,self.argumentos["indice"]])
-			time.sleep(1)
+		if self.argumentos["opcion"] == "lector":
+			palabras = str.split(self.texto[0],"\n")
+			for palabra in palabras:
+				#self.palabraLectura.emit([palabra,self.argumentos["indice"]])
+				self.palabraLectura.emit(palabra)
+				time.sleep(1)
+		elif self.argumentos["opcion"] == "escritor":
+			self.cuadroDeEscritura.setEnabled(True)
+			
+	
+	def stop(self):
+		self.texto[0] = self.cuadroDeEscritura.toPlainText()
+		self.cuadroDeEscritura.setEnabled(False)
+		self.quit()
 
 class Proceso():
 		id = 0
@@ -92,32 +104,51 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
-		self.argumentos = {"variableTexto":"Autómata\nSalvajes\nArtificio\nHipócritas\nClon\nPrimitivos\nEntelequia\nRacistas\nAnatema\nIntolerantes\n"}
+		self.texto = ["Autómata\nSalvajes\nArtificio\nHipócritas\nClon\nPrimitivos\nEntelequia\nRacistas\nAnatema\nIntolerantes\n"]
 
-		self.txtE1.setPlainText(self.argumentos["variableTexto"])
-		self.txtE2.setPlainText(self.argumentos["variableTexto"])
+		self.txtE1.setPlainText(self.texto[0])
+		self.txtE2.setPlainText(self.texto[0])
 
 		self.txtE1.setEnabled(False)
 		self.txtE2.setEnabled(False)
 		self.txtL1.setEnabled(False)
 		self.txtL2.setEnabled(False)
-
-		self.escritoresIndexados = [self.txtE1,self.txtE2]
-		self.lectoresIndexados = [self.txtL1,self.txtL2]
 			
-		self.btnIL1.clicked.connect(lambda: self.inicioLector(0))
-		self.btnIL2.clicked.connect(lambda: self.inicioLector(1))
+		self.btnIL1.clicked.connect(self.inicioLector1)
+		self.btnIL2.clicked.connect(self.inicioLector2)
+		self.btnIE1.clicked.connect(self.inicioEscritor1)
+		self.btnIE1.clicked.connect(self.pararEscritor1)
 
-	def inicioLector(self,indice):
-		self.argumentos["indice"] = indice
-		self.hiloLector = lectorEscritor(self.argumentos)
-		self.hiloLector.palabraLectura.connect(self.socketLector)
+		self.argumentosEscritor = {"opcion":"escritor"}
+		self.hiloEscritor1 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE1)
+		self.hiloEscritor2 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE2)
+
+	def inicioEscritor1(self):
+		self.hiloEscritor1.start()
+
+	def inicioLector1(self):
+		self.argumentos = {"opcion":"lector"}
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos)
+		self.hiloLector.palabraLectura.connect(self.socketLector1)
 		self.hiloLector.start()
 	
-	def socketLector(self,senial):
-		self.texto = self.lectoresIndexados[senial[1]].toPlainText()
-		self.texto = self.texto + "\n"+ senial[0]
-		self.lectoresIndexados[senial[1]].setPlainText(self.texto)
+	def socketLector1(self,senial):
+		self.txtL1.setPlainText("")
+		self.escribir = self.txtL1.toPlainText()
+		self.escribir = self.escribir + "\n"+ senial
+		self.txtL1.setPlainText(self.escribir)
+
+	def inicioLector2(self):
+		self.argumentos = {"opcion":"lector"}
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos)
+		self.hiloLector.palabraLectura.connect(self.socketLector2)
+		self.hiloLector.start()
+	
+	def socketLector2(self,senial):
+		self.txtL2.setPlainText("")
+		self.escribir = self.txtL2.toPlainText()
+		self.escribir = self.escribir + "\n"+ senial
+		self.txtL2.setPlainText(self.escribir)
 
 
 	def correr(self):
