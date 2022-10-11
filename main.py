@@ -64,27 +64,54 @@ class ProductorConsumidor(QtCore.QThread):
 class lectorEscritor(QtCore.QThread):
 	palabraLectura = QtCore.pyqtSignal(str)#mandara una palabra al cuadro de lectura
 
-	def __init__(self,texto,argumentos,cuadroDeEscritura):
+	def __init__(self,texto,argumentos,cuadroDeTexto,mutex,semaforoEscritor,contadorLectores):
 		super(lectorEscritor, self).__init__(None)
 		self.texto = texto
 		self.argumentos = argumentos
-		self.cuadroDeEscritura = cuadroDeEscritura
+		self.cuadroDeTexto = cuadroDeTexto
+		self.mutex = mutex
+		self.semaforoEscritor =semaforoEscritor
+		self.contadorLectores = contadorLectores
 		
 	#se inicia o continua el proceso
 	def run(self):
 		if self.argumentos["opcion"] == "lector":
-			palabras = str.split(self.texto[0],"\n")
-			for palabra in palabras:
-				#self.palabraLectura.emit([palabra,self.argumentos["indice"]])
-				self.palabraLectura.emit(palabra)
-				time.sleep(1)
+			self.lectura()
 		elif self.argumentos["opcion"] == "escritor":
-			self.cuadroDeEscritura.setEnabled(True)
+			if self.semaforoEscritor[0] == True:
+				self.cuadroDeTexto.setEnabled(True)
+				self.semaforoEscritor[0] = False
+				print("Se apago el semaforo del escritor")
+
+	def lectura(self):
+		#self.cuadroDeTexto.setPlainText("")
+		self.mutex.lock()
+		print("Se bloqueo lector,1 parte")
+		self.contadorLectores[0] += 1
+		if self.contadorLectores[0] == 1:
+			self.semaforoEscritor[0] = False
+		self.mutex.unlock()
+		print("Se desbloqueo lector,1 parte")
+		palabras = str.split(self.texto[0],"\n")
+		for palabra in palabras:
+			#self.palabraLectura.emit([palabra,self.argumentos["indice"]])
+			self.palabraLectura.emit(palabra)
+			time.sleep(1)
+		self.mutex.lock()
+		print("Se bloqueo lector,2 parte")
+		self.contadorLectores[0] -= 1
+		if self.contadorLectores[0] == 0:
+			self.semaforoEscritor[0] = True
+		self.mutex.unlock()
+		print("Se desbloqueo lector,1 parte")
+
 			
 	
 	def stop(self):
-		self.texto[0] = self.cuadroDeEscritura.toPlainText()
-		self.cuadroDeEscritura.setEnabled(False)
+		self.texto[0] = self.cuadroDeTexto.toPlainText()
+		self.cuadroDeTexto.setEnabled(False)
+		self.semaforoEscritor[0] = True
+		print("Se prendio el semaforo del escritor")
 		self.quit()
 
 class Proceso():
@@ -109,6 +136,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.txtE1.setPlainText(self.texto[0])
 		self.txtE2.setPlainText(self.texto[0])
 
+		self.txtL1.setPlainText("")
+		self.txtL2.setPlainText("")
+
 		self.txtE1.setEnabled(False)
 		self.txtE2.setEnabled(False)
 		self.txtL1.setEnabled(False)
@@ -118,12 +148,16 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.btnIL2.clicked.connect(self.inicioLector2)
 		self.btnIE1.clicked.connect(self.inicioEscritor1)
 		self.btnPE1.clicked.connect(self.pararEscritor1)
-		self.btnIE2.clicked.connect(self.inicioEscritor1)
-		self.btnPE2.clicked.connect(self.pararEscritor1)
+		self.btnIE2.clicked.connect(self.inicioEscritor2)
+		self.btnPE2.clicked.connect(self.pararEscritor2)
 
 		self.argumentosEscritor = {"opcion":"escritor"}
-		self.hiloEscritor1 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE1)
-		self.hiloEscritor2 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE2)
+		#self.argumentosEscritor = {"seEscribio":False}
+		self.semaforoEscritor=[True]
+		self.contadorLectores = [0]
+		self.mutexLectores = QtCore.QMutex()
+		self.hiloEscritor1 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE1,self.mutexLectores,self.semaforoEscritor,self.contadorLectores)
+		self.hiloEscritor2 = lectorEscritor(self.texto,self.argumentosEscritor,self.txtE2,self.mutexLectores,self.semaforoEscritor,self.contadorLectores)
 
 	def inicioEscritor1(self):
 		self.hiloEscritor1.start()
@@ -139,24 +173,22 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 	def inicioLector1(self):
 		self.argumentos = {"opcion":"lector"}
-		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtE1)
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtL1,self.mutexLectores,self.semaforoEscritor,self.contadorLectores)
 		self.hiloLector.palabraLectura.connect(self.socketLector1)
 		self.hiloLector.start()
 	
 	def socketLector1(self,senial):
-		self.txtL1.setPlainText("")
 		self.escribir = self.txtL1.toPlainText()
 		self.escribir = self.escribir + "\n"+ senial
 		self.txtL1.setPlainText(self.escribir)
 
 	def inicioLector2(self):
 		self.argumentos = {"opcion":"lector"}
-		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtE1)
+		self.hiloLector = lectorEscritor(self.texto,self.argumentos,self.txtL2,self.mutexLectores,self.semaforoEscritor,self.contadorLectores)
 		self.hiloLector.palabraLectura.connect(self.socketLector2)
 		self.hiloLector.start()
 	
 	def socketLector2(self,senial):
-		self.txtL2.setPlainText("")
 		self.escribir = self.txtL2.toPlainText()
 		self.escribir = self.escribir + "\n"+ senial
 		self.txtL2.setPlainText(self.escribir)
