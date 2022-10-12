@@ -109,7 +109,7 @@
    <widget class="QPushButton" name="btnIL1">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>140</x>
       <y>220</y>
       <width>75</width>
       <height>23</height>
@@ -117,25 +117,12 @@
     </property>
     <property name="text">
      <string>Leer</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnPL1">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>220</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Dejar de leer</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnIL2">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>550</x>
       <y>220</y>
       <width>75</width>
       <height>23</height>
@@ -143,19 +130,6 @@
     </property>
     <property name="text">
      <string>Leer</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnPL2">
-    <property name="geometry">
-     <rect>
-      <x>630</x>
-      <y>220</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Dejar de leer</string>
     </property>
    </widget>
   </widget>
