@@ -1,9 +1,62 @@
 #ejecutar desde la carpeta, para que detecte el archivo de la interfaz grafica
 from random import randint
+from re import I
 from PyQt5 import QtCore, QtWidgets,QtGui
 from PyQt5.QtGui import  QColor
 from PyQt5 import uic
 import sys, time
+import math
+
+class Productor(QtCore.QThread):
+	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
+	pintarTablaMemoria = QtCore.pyqtSignal(dict)
+
+	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria):
+		super(Productor, self).__init__(None)
+		self.semaforoProductor = semaforoProductor
+		self.semaforoConsumidor = semaforoConsumidor
+		self.procesosPendientes = procesosPendientes
+		self.paginasDisponibles = paginasDisponibles
+		self.tablaPaginas = tablaPaginas
+		self.tablaMemoria = tablaMemoria
+
+	def run(self):
+		while(self.semaforoProductor[0]==True):
+			#recorremos los procesos pendientes
+			while len(self.procesosPendientes)>0:
+				procesoActual = self.procesosPendientes[0]
+				tamanio = procesoActual.tamanio
+				if ((self.paginasDisponibles[0]*8)/tamanio)<1:#si ya no hay espacion disponible en la memoria fisica sale
+					self.semaforoProductor[0] = False
+					self.semaforoConsumidor[0] = True
+				else:#si aun hay espacio en la memoria fisica
+					procesoActual = self.procesosPendientes.pop(0)
+					paginasNecesitadas = math.ceil(tamanio/8)
+					indiceAuxiliar = 1
+					#llenamos la tabla de paginas
+					for i in range(paginasNecesitadas):#repetimos segun los marcos que necesite el proceso, usamos el numero de paginas porque se supone tienen el mismo tamaño que los marcos
+						for j in range(self.tablaPaginas.rowCount()):
+							if self.tablaPaginas.item(j,0).text()=="-":
+								self.actualizaTablaPaginas.emit({"fila":j,"proceso":procesoActual.id,"indice":indiceAuxiliar})
+								print("fila"+str(j)+"proceso"+str(procesoActual.id)+"indice"+str(indiceAuxiliar))
+								time.sleep(0.05)
+								indiceAuxiliar+=1
+								self.paginasDisponibles[0] -= 1
+								break
+					#pintamos la memoria fisica de acuerdo a la tabla de paginas
+					tamanioAuxiliar = procesoActual.tamanio
+					color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
+					for i in range(self.tablaPaginas.rowCount()):	
+						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
+								posicionMarco = int(self.tablaPaginas.item(i,2).text())
+								for j in range(8):
+									if tamanioAuxiliar>0:
+										columna = QtWidgets.QTableWidgetItem("")
+										columna.setBackground(color)
+										self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
+										tamanioAuxiliar-=1
+
+
 
 #dependiendo de la opcion pasada en los parametros sera si es productor o consumidor
 class ProductorConsumidor(QtCore.QThread):
@@ -61,59 +114,69 @@ class ProductorConsumidor(QtCore.QThread):
 
 class Proceso():
 		id = 0
-		porcentajeProcesado = 0
-		banderaBloqueo = False
-		tiempoEstimado = 0
-		banderaTerminado = False
+		tamanio = 0
+		color = []
 
 
-		def __init__(self,id,tiempoEstimado):
+		def __init__(self,id,tamanio,color):
 				self.id = id
-				self.tiempoEstimado = tiempoEstimado
+				self.tamanio = tamanio
+				self.color = color
 
 class VentanaPrincipal(QtWidgets.QMainWindow):
 	def __init__(self):
 		QtWidgets.QMainWindow.__init__(self)
 		self.ui = uic.loadUi('prueba.ui',self)#Se carga la interfaz grafica
 
-		self.colaPendientes = []
-		self.colaTerminados = []
+		self.procesosPendientes = []
+		self.procesosTerminados = []
+		self.matrizTablaPendientes = []
+		self.matrizTablaTerminados = []
+		self.matrizMemoria = []
+		self.matrizTablaPaginas = []
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(20):
-			agregar = Proceso(i+1,randint(1,10))
-			self.colaPendientes.append(agregar)
+			agregar = Proceso(i+1,randint(1,24),[randint(0,255),randint(0,255),randint(0,255)])
+			self.procesosPendientes.append(agregar)
 
-		#inicializamos los datos de las tablas
+		#coloreamos la memoria
 		for i in range(10):
-			columna = QtWidgets.QTableWidgetItem("")
-			color = QColor(124,252,0)
-			columna.setBackground(color)
-			self.tablaProcesos.setItem(0,i,columna)
+			for j in range(8):
+				columna = QtWidgets.QTableWidgetItem("")
+				color = QColor(124,252,0)
+				columna.setBackground(color)
+				self.tablaMemoria.setItem(i,j,columna)
 
+		#llenamos la tabla de pendientes
 		for i in range(20):
 			self.tablaPendientes.insertRow(self.tablaPendientes.rowCount())
-			agregar = QtWidgets.QTableWidgetItem("Proceso "+str(self.colaPendientes[i].id))
-			self.tablaPendientes.setItem(i,0,agregar)
+			id = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].id))
+			tamanio = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].tamanio))
+			self.tablaPendientes.setItem(i,0,id)
+			self.tablaPendientes.setItem(i,1,tamanio)
+
+		self.paginasDisponibles = [10]
+		self.semaforoProductor = [True]
+		self.semaforoConsumidor  =[False]
 			
 		self.btnI.clicked.connect(self.correr)
 
 	def correr(self):
-		self.dato = [0]
-		self.repeticiones = [0]
-		self.banderaProductor = [1]
-		self.banderaConsumidor = [0]
-		self.ocupados = [0]
-		self.mutex = QtCore.QMutex()
-		self.productor = ProductorConsumidor(self.mutex,self.dato,self.ocupados,1,self.repeticiones,self.banderaProductor,self.banderaConsumidor)
-		self.consumidor = ProductorConsumidor(self.mutex,self.dato,self.ocupados,2,self.repeticiones,self.banderaProductor,self.banderaConsumidor)
-		self.productor.senial.connect(self.socketPintaSector)
-		self.productor.senialQuitar.connect(self.quitaDeTabla)
-		self.consumidor.senial.connect(self.socketPintaSector)
-		self.consumidor.senialAgregar.connect(self.aniadirATabla)
+		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria)
+		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
+		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
 		self.productor.start()
-		self.consumidor.start()
 		
+	def socketActualizaTablaPaginas(self,senial):
+		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
+		indice = QtWidgets.QTableWidgetItem(str(senial["indice"]))
+		self.tablaPaginas.setItem(senial["fila"],0,proceso)
+		self.tablaPaginas.setItem(senial["fila"],1,indice)
+
+	def socketPintarTablaMemoria(self,senial):
+		self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
+
 	def socketPintaSector(self,senial):
 		columna = QtWidgets.QTableWidgetItem("")
 		if senial[1] == 1:
