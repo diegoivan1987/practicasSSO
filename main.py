@@ -25,10 +25,6 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 		self.procesosPendientes = []
 		self.procesosEnMemoria = []
-		self.matrizTablaPendientes = []
-		self.matrizTablaTerminados = []
-		self.matrizMemoria = []
-		self.matrizTablaPaginas = []
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(20):
@@ -44,7 +40,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 			self.tablaPendientes.setItem(i,0,id)
 			self.tablaPendientes.setItem(i,1,tamanio)
 
-		self.paginasDisponibles = [10]
+		self.paginasDisponibles = [10]#tamanio total de la tabla de paginas
 		self.semaforoProductor = [True]
 		self.semaforoConsumidor  =[False]
 			
@@ -84,17 +80,6 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
 		id = QtWidgets.QTableWidgetItem(str(senial))
 		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,id)
-			
-	def quitaDeTabla(self,senial):
-		self.tablaPendientes.removeRow(senial)
-		agregar = self.colaPendientes.pop(senial)
-		self.colaTerminados.append(agregar)
-
-	def aniadirATabla(self,senial):
-		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
-		proceso = self.colaTerminados.pop(senial)
-		agregar = QtWidgets.QTableWidgetItem("Proceso "+str(proceso.id))
-		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,agregar)
 
 #Iniciamos la aplicacion en bucle
 app = QtWidgets.QApplication(sys.argv)
