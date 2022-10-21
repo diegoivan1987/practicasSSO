@@ -81,7 +81,7 @@ class Consumidor(QtCore.QThread):
 	def run(self):
 		while True:
 			if(self.semaforoConsumidor[0]==True):
-				#recorremos la lista de procesos pendientes
+				#recorremos la lista de procesos en memoria
 				if len(self.procesosEnMemoria)>0:
 					procesoActual = self.procesosEnMemoria.pop(0)
 					tamanio = procesoActual.tamanio
@@ -122,7 +122,9 @@ class Consumidor(QtCore.QThread):
 					#añadirlo a procesos terminados
 					self.agregarATerminados.emit(procesoActual.id)
 					time.sleep(0.05)
-				else:#cambiar semaforos
+				else:#cambiar semaforos y vaciar la barra de carga
+					self.actualizarBarra.emit({"idProceso":"","porcentajeBarra":0})#vaciamos la barra de carga
+					time.sleep(0.1)
 					self.semaforoConsumidor[0]=False
 					self.semaforoProductor[0]=True
 					
@@ -203,7 +205,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 	def socketAgregarATerminados(self,senial):
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
 		id = QtWidgets.QTableWidgetItem(str(senial))
-		self.tablaPendientes.setItem(self.tablaTerminados.rowCount()-1,0,id)
+		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,id)
 			
 	def quitaDeTabla(self,senial):
 		self.tablaPendientes.removeRow(senial)
@@ -213,7 +215,6 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 	def aniadirATabla(self,senial):
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
 		proceso = self.colaTerminados.pop(senial)
-		print("Se agrego "+str(proceso.id))
 		agregar = QtWidgets.QTableWidgetItem("Proceso "+str(proceso.id))
 		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,agregar)
 
