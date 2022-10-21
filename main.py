@@ -9,7 +9,7 @@ import math
 
 class Productor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
-	pintarTablaMemoria = QtCore.pyqtSignal(dict)#
+	pintarTablaMemoria = QtCore.pyqtSignal(dict)
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
 		super(Productor, self).__init__(None)
@@ -28,7 +28,7 @@ class Productor(QtCore.QThread):
 				if len(self.procesosPendientes)>0:
 					procesoActual = self.procesosPendientes[0]
 					tamanio = procesoActual.tamanio
-					if ((self.paginasDisponibles[0]*8)/tamanio)<1:#si ya no hay espacion disponible en la memoria fisica sale
+					if ((self.paginasDisponibles[0]*8)/tamanio)<1:#si ya no hay espacion disponible en la memoria fisica sale del productor
 						self.semaforoProductor[0] = False
 						self.semaforoConsumidor[0] = True
 					else:#si aun hay espacio en la memoria fisica
@@ -46,23 +46,27 @@ class Productor(QtCore.QThread):
 									self.paginasDisponibles[0] -= 1
 									break
 						#pintamos la memoria fisica de acuerdo a la tabla de paginas
-						tamanioAuxiliar = procesoActual.tamanio
+						tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
 						color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
 						for i in range(self.tablaPaginas.rowCount()):	
 							if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
 									posicionMarco = int(self.tablaPaginas.item(i,2).text())
 									for j in range(8):
-										if tamanioAuxiliar>0:
+										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
 											columna = QtWidgets.QTableWidgetItem("")
 											columna.setBackground(color)
 											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
 											time.sleep(0.05)
 											tamanioAuxiliar-=1
-
+				else:#si ya se terminaron todos los procesos pendientes, tambien sale del productor
+					self.semaforoProductor[0] = False
+					self.semaforoConsumidor[0] = True
 class Consumidor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
 	pintarTablaMemoria = QtCore.pyqtSignal(dict)
 	actualizarBarra = QtCore.pyqtSignal(dict)
+	quitarDeTablaPendientes = QtCore.pyqtSignal(int)
+	agregarATerminados = QtCore.pyqtSignal(int)
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
 		super(Consumidor, self).__init__(None)
@@ -77,85 +81,51 @@ class Consumidor(QtCore.QThread):
 	def run(self):
 		while True:
 			if(self.semaforoConsumidor[0]==True):
-				print("Entro consumidor")
+				#recorremos la lista de procesos pendientes
 				if len(self.procesosEnMemoria)>0:
 					procesoActual = self.procesosEnMemoria.pop(0)
 					tamanio = procesoActual.tamanio
 					rangoAumento = math.floor(100/tamanio)
 					porcentajeActual = 0
 					numeroAumentos = 0
+					#vamos procesandolo por aumentos, no de 1 en 1
 					while numeroAumentos < tamanio:
 						porcentajeActual += rangoAumento
 						self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":porcentajeActual})
 						numeroAumentos += 1
 						time.sleep(0.1)
-					if(porcentajeActual<100):
+					if(porcentajeActual<100):#solo por si llegase a quedar incompleto despues de haber dado los aumentos
 						self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":100})
 						time.sleep(0.1)
-				else:
-					self.semaforoConsumidor[0]=False
-					self.semaforoProductor[0]=False
-					#sobreescribir tabla de paginas
+					#quitarlo de pendientes
+					self.quitarDeTablaPendientes.emit(1)
+					time.sleep(0.05)
 					#quitarlo de la memoria
+					tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
+					color = QColor(255,255,255)
+					for i in range(self.tablaPaginas.rowCount()):	
+						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
+								posicionMarco = int(self.tablaPaginas.item(i,2).text())
+								for j in range(8):
+									if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
+										columna = QtWidgets.QTableWidgetItem("")
+										columna.setBackground(color)
+										self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
+										time.sleep(0.05)
+										tamanioAuxiliar-=1
+					#sobreescribir tabla de paginas
+					for i in range(self.tablaPaginas.rowCount()):#recorremos la tabla de paginas
+						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
+							self.actualizaTablaPaginas.emit({"fila":i,"proceso":"-","indice":"-"})
+							time.sleep(0.05)
+							self.paginasDisponibles[0] += 1
 					#añadirlo a procesos terminados
-					#cambiar semaforos
-
-
-
-
-#dependiendo de la opcion pasada en los parametros sera si es productor o consumidor
-class ProductorConsumidor(QtCore.QThread):
-	senial = QtCore.pyqtSignal(list)#señal que indica si quita o agrega al arreglo de procesos y que proceso es
-	senialQuitar = QtCore.pyqtSignal(int)#para quitar procesos de la tabla de pendientes al cargarlo al buffer(producir)
-	senialAgregar = QtCore.pyqtSignal(int)#para agregar procesos de la tabla de terminados al quitarlo del buffer(consumir)
-
-	def __init__(self,mutex,dato,ocupados,opcion,repeticiones,banderaProductor,banderaConsumidor):
-		super(ProductorConsumidor, self).__init__(None)
-		self.mutex = mutex
-		self.dato = dato
-		self.opcion = opcion#indicara si es productor o consumidor
-		self.repeticiones = repeticiones#numero total de veces que se ha consumido un proceso
-		self.banderaProductor = banderaProductor#bandera para hacer trabajar al productor
-		self.banderaConsumidor = banderaConsumidor#bandera para hacer trabajar al consumidor
-		self.ocupados = ocupados#espacios ocupados en el buffer
-		
-	#se inicia o continua el proceso
-	def run(self):
-		while self.repeticiones[0]<20:
-			self.mutex.lock()
-			#print("repeticion "+str(self.repeticiones[0]))
-			if self.opcion == 1:#productor
-				if self.banderaProductor[0] == 1:
-					if self.repeticiones[0] < 20:
-						self.producir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
-						self.senialQuitar.emit(0)
-			elif self.opcion == 2:#consumidor
-				if self.banderaConsumidor[0] == 1:
-					self.consumir(self.dato,self.ocupados,self.repeticiones,self.banderaProductor,self.banderaConsumidor,self.senial)
-					self.senialAgregar.emit(0)
-			self.mutex.unlock()
-	
-
-	def producir(self,dato,ocupado,repeticiones,banderaProductor,banderaConsumidor,senial):
-		dato[0]+= 1
-		#print("Produce "+str(dato[0]))
-		senial.emit([dato[0]-1,1])
-		time.sleep(0.1)
-		ocupado[0] +=1 
-		if ocupado[0] == 10:
-			banderaProductor[0] = 0
-			banderaConsumidor[0] = 1
-
-	def consumir(self,dato,ocupado,repeticiones,banderaProductor,banderaConsumidor,senial):
-		dato[0] -= 1
-		#print("Consume "+str(dato[0]))
-		senial.emit([dato[0],2])
-		time.sleep(0.1)
-		repeticiones[0] +=1
-		ocupado[0] -= 1
-		if ocupado[0] == 0:
-			banderaProductor[0] = 1
-			banderaConsumidor[0] = 0
+					self.agregarATerminados.emit(procesoActual.id)
+					time.sleep(0.05)
+				else:#cambiar semaforos
+					self.semaforoConsumidor[0]=False
+					self.semaforoProductor[0]=True
+					
 
 class Proceso():
 		id = 0
@@ -206,6 +176,10 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
 		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
 		self.consumidor.actualizarBarra.connect(self.socketBarra)
+		self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
+		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
+		self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
+		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
 		self.productor.start()
 		self.consumidor.start()
 		
@@ -222,7 +196,14 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.label_3.setText("Proceso: "+str(senial["idProceso"]))
 		self.barra.setValue(senial["porcentajeBarra"])
 
-
+	def socketQuitarDeTablaPendientes(self,senial):
+		if senial == 1:
+			self.tablaPendientes.removeRow(0)#como usamos una lista FIFO, siempre se va a terminar el primer proceso en la lista, por lo tanto, siempre quitamos el primero de la tabla
+				
+	def socketAgregarATerminados(self,senial):
+		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
+		id = QtWidgets.QTableWidgetItem(str(senial))
+		self.tablaPendientes.setItem(self.tablaTerminados.rowCount()-1,0,id)
 			
 	def quitaDeTabla(self,senial):
 		self.tablaPendientes.removeRow(senial)
