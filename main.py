@@ -60,7 +60,7 @@ class Productor(QtCore.QThread):
 class Consumidor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
 	pintarTablaMemoria = QtCore.pyqtSignal(dict)
-	actualizarBarra = QtCore.pyqtSignal(int)
+	actualizarBarra = QtCore.pyqtSignal(dict)
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
 		super(Consumidor, self).__init__(None)
@@ -82,11 +82,11 @@ class Consumidor(QtCore.QThread):
 				numeroAumentos = 0
 				while numeroAumentos < tamanio:
 					porcentajeActual += rangoAumento
-					self.actualizarBarra.emit(porcentajeActual)
+					self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":porcentajeActual})
 					numeroAumentos += 1
 					time.sleep(0.1)
 				if(porcentajeActual<100):
-					self.actualizarBarra.emit(100)
+					self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":100})
 					time.sleep(0.1)
 				#sobreescribir tabla de paginas
 				#quitarlo de la memoria
@@ -197,7 +197,10 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
+		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
+		self.consumidor.actualizarBarra.connect(self.socketBarra)
 		self.productor.start()
+		self.consumidor.start()
 		
 	def socketActualizaTablaPaginas(self,senial):
 		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
@@ -207,6 +210,12 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 	def socketPintarTablaMemoria(self,senial):
 		self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
+
+	def socketBarra(self,senial):
+		print("mando senai")
+		self.label_3.setText("Proceso: "+senial["idProceso"])
+		self.barra.setValue(senial["porcentaje"])
+
 
 			
 	def quitaDeTabla(self,senial):
