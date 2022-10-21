@@ -9,7 +9,7 @@ import math
 
 class Productor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
-	pintarTablaMemoria = QtCore.pyqtSignal(dict)
+	pintarTablaMemoria = QtCore.pyqtSignal(dict)#
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
 		super(Productor, self).__init__(None)
