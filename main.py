@@ -12,11 +12,13 @@ class Proceso():
 		id = 0
 		tamanio = 0
 		color = []
+		colorVirtual = []
 
-		def __init__(self,id,tamanio,color):
+		def __init__(self,id,tamanio,color,colorVirtual):
 				self.id = id
 				self.tamanio = tamanio
 				self.color = color
+				self.colorVirtual = colorVirtual
 
 class VentanaPrincipal(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -27,13 +29,16 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.procesosEnMemoria = []
 
 		#inicializamos los arreglos de procesos y sus datos
-		for i in range(20):
-			agregar = Proceso(i+1,randint(1,24),[randint(0,255),randint(0,255),randint(0,255)])
+		for i in range(10):
+			color1 = randint(0,255)
+			color2 = randint(0,255)
+			color3 = randint(0,255)
+			agregar = Proceso(i+1,randint(1,24),[color1,color2,color3],[color1-10,color2-10,color3-10])
 			self.procesosPendientes.append(agregar)
 
 
 		#llenamos la tabla de pendientes
-		for i in range(20):
+		for i in range(len(self.procesosPendientes)):
 			self.tablaPendientes.insertRow(self.tablaPendientes.rowCount())
 			id = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].id))
 			tamanio = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].tamanio))
@@ -50,7 +55,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
-		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
+		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,indiceMarcoActual)
 		self.consumidor.actualizarBarra.connect(self.socketBarra)
 		self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)

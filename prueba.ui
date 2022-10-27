@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>803</width>
-    <height>540</height>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QTableWidget" name="tablaMemoria">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>50</y>
-      <width>421</width>
-      <height>351</height>
+      <x>280</x>
+      <y>190</y>
+      <width>171</width>
+      <height>161</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -32,8 +32,17 @@
     <property name="columnCount">
      <number>8</number>
     </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
     <attribute name="horizontalHeaderDefaultSectionSize">
-     <number>50</number>
+     <number>20</number>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>15</number>
     </attribute>
     <row>
      <property name="text">
@@ -211,7 +220,7 @@
      <rect>
       <x>10</x>
       <y>270</y>
-      <width>181</width>
+      <width>221</width>
       <height>241</height>
      </rect>
     </property>
@@ -281,6 +290,11 @@
     <column>
      <property name="text">
       <string>Marco</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>RAM</string>
      </property>
     </column>
     <item row="0" column="0">
@@ -437,8 +451,8 @@
    <widget class="QProgressBar" name="barra">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>460</y>
+      <x>220</x>
+      <y>530</y>
       <width>411</width>
       <height>23</height>
      </rect>
@@ -450,14 +464,365 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>430</y>
+      <x>340</x>
+      <y>500</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
      <string>Proceso:</string>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tablaVirtual">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>50</y>
+      <width>171</width>
+      <height>461</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="columnCount">
+     <number>8</number>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="horizontalHeaderDefaultSectionSize">
+     <number>20</number>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>15</number>
+    </attribute>
+    <row>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>2</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>3</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>4</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>5</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>6</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>7</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>8</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>9</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>10</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>11</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>12</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>13</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>14</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>15</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>16</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>17</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>18</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>19</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>20</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>21</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>22</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>23</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>24</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>25</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>26</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>27</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>28</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>29</string>
+     </property>
+    </row>
+    <column>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>2</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>3</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>4</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>5</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>6</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>7</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QLabel" name="lbIndice_1">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>190</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_2">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>210</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_3">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>220</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_4">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>240</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_5">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>250</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_6">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>270</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_7">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>280</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_8">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>300</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_9">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>310</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbIndice_10">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>330</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

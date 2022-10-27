@@ -10,7 +10,7 @@ class Consumidor(QtCore.QThread):
 	quitarDeTablaPendientes = QtCore.pyqtSignal(int)
 	agregarATerminados = QtCore.pyqtSignal(int)
 
-	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
+	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria,indiceMarcoActual):
 		super(Consumidor, self).__init__(None)
 		self.semaforoProductor = semaforoProductor
 		self.semaforoConsumidor = semaforoConsumidor
@@ -19,6 +19,7 @@ class Consumidor(QtCore.QThread):
 		self.tablaPaginas = tablaPaginas
 		self.tablaMemoria = tablaMemoria
 		self.procesosEnMemoria = procesosEnMemoria
+		self.indiceMarcoActual = indiceMarcoActual
 
 	def run(self):
 		while True:
