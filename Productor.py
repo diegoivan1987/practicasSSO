@@ -8,7 +8,7 @@ class Productor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
 	pintarTablaMemoria = QtCore.pyqtSignal(dict)
 
-	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
+	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria,numeroMarcoFisico,numeroMarcoVirtual):
 		super(Productor, self).__init__(None)
 		self.semaforoProductor = semaforoProductor
 		self.semaforoConsumidor = semaforoConsumidor
@@ -17,10 +17,13 @@ class Productor(QtCore.QThread):
 		self.tablaPaginas = tablaPaginas
 		self.tablaMemoria = tablaMemoria
 		self.procesosEnMemoria = procesosEnMemoria
+		self.numeroMarcoFisico = numeroMarcoFisico
+		self.numeroMarcoVirtual = numeroMarcoVirtual
 
 	def run(self):
 		while True:
 			if(self.semaforoProductor[0]==True):
+				
 				#recorremos los procesos pendientes
 				if len(self.procesosPendientes)>0:
 					procesoActual = self.procesosPendientes.pop(0)
@@ -28,28 +31,52 @@ class Productor(QtCore.QThread):
 					self.procesosEnMemoria.append(procesoActual)
 					paginasNecesitadas = math.ceil(tamanio/8)
 					indiceAuxiliar = 1
+					primerMarco = 1 #servira para añadir solamente el primer marco a RAM
 					#llenamos la tabla de paginas
 					for i in range(paginasNecesitadas):#repetimos segun los marcos que necesite el proceso, usamos el numero de paginas porque se supone tienen el mismo tamaño que los marcos
-						for j in range(self.tablaPaginas.rowCount()):
-							if self.tablaPaginas.item(j,0).text()=="-":
-								self.actualizaTablaPaginas.emit({"fila":j,"proceso":procesoActual.id,"indice":indiceAuxiliar})
-								time.sleep(0.05)
-								indiceAuxiliar+=1
-								self.paginasDisponibles[0] -= 1
-								break
-					#pintamos la memoria fisica de acuerdo a la tabla de paginas
+						if primerMarco == 1:
+							self.actualizaTablaPaginas.emit({"proceso":procesoActual.id,"indice":indiceAuxiliar,"funcion":"agregar","RAM":1,"numeroMarco":self.numeroMarcoFisico[0]})#mandamos la primer pagina a la RAM
+							time.sleep(0.05)
+							self.actualizaTablaPaginas.emit({"proceso":procesoActual.id,"indice":indiceAuxiliar,"funcion":"agregar","RAM":0,"numeroMarco":self.numeroMarcoVirtual[0]})#tambien mandamos su respaldo a la virtual
+							time.sleep(0.05)
+							
+							self.numeroMarcoFisico[0]+= 1
+							self.numeroMarcoVirtual[0] += 1
+							primerMarco = 0
+						else:
+							self.actualizaTablaPaginas.emit({"proceso":procesoActual.id,"indice":indiceAuxiliar,"funcion":"agregar","RAM":0,"numeroMarco":self.numeroMarcoVirtual[0]})#mandamos virtuales
+							
+							time.sleep(0.05)
+							self.numeroMarcoVirtual[0] += 1
+							
+						indiceAuxiliar+=1
+					#pintamos la memoria de acuerdo a la tabla de paginas
 					tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
 					color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
+					colorVirtual = QColor(procesoActual.colorVirtual[0],procesoActual.colorVirtual[1],procesoActual.colorVirtual[2])
 					for i in range(self.tablaPaginas.rowCount()):	
 						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
 								posicionMarco = int(self.tablaPaginas.item(i,2).text())
-								for j in range(8):
-									if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
-										columna = QtWidgets.QTableWidgetItem("")
-										columna.setBackground(color)
-										self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
-										time.sleep(0.05)
-										tamanioAuxiliar-=1
+								if self.tablaPaginas.item(i,3).text() == "1":#si es un marco de memoria fisica
+									for j in range(8):
+										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
+											columna = QtWidgets.QTableWidgetItem("")
+											columna.setBackground(color)
+											columnaVirtual = QtWidgets.QTableWidgetItem("")
+											columnaVirtual.setBackground(colorVirtual)
+											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna,"RAM":1})
+											time.sleep(0.05)
+											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columnaVirtual,"RAM":0})
+											time.sleep(0.05)
+											tamanioAuxiliar-=1
+								else:#las demas paginas van en memoria virtual
+									for j in range(8):
+										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
+											columna = QtWidgets.QTableWidgetItem("")
+											columna.setBackground(color)
+											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna,"RAM":0})
+											time.sleep(0.05)
+											tamanioAuxiliar-=1
 				else:#si ya se terminaron todos los procesos pendientes, tambien sale del productor
 					self.semaforoProductor[0] = False
 					self.semaforoConsumidor[0] = True

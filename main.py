@@ -27,13 +27,14 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 		self.procesosPendientes = []
 		self.procesosEnMemoria = []
+		self.indiceMarcoActual = 0
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(10):
 			color1 = randint(0,255)
 			color2 = randint(0,255)
 			color3 = randint(0,255)
-			agregar = Proceso(i+1,randint(1,24),[color1,color2,color3],[color1-10,color2-10,color3-10])
+			agregar = Proceso(i+1,randint(1,24),[color1,color2,color3],[color1-50,color2-50,color3-50])
 			self.procesosPendientes.append(agregar)
 
 
@@ -48,30 +49,42 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.paginasDisponibles = [10]#tamanio total de la tabla de paginas
 		self.semaforoProductor = [True]
 		self.semaforoConsumidor  =[False]
+
+		self.numeroMarcoFisico = [0] #serviran para llenar la tabla de paginas
+		self.numeroMarcoVirtual = [0] #serviran para llenar la tabla de paginas
 			
 		self.btnI.clicked.connect(self.correr)
 
 	def correr(self):
-		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
+		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.numeroMarcoFisico,self.numeroMarcoVirtual)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
-		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,indiceMarcoActual)
-		self.consumidor.actualizarBarra.connect(self.socketBarra)
-		self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
-		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
-		self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
-		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
+		#self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.indiceMarcoActual)
+		#self.consumidor.actualizarBarra.connect(self.socketBarra)
+		#self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
+		#self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
+		#self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
+		#self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
 		self.productor.start()
-		self.consumidor.start()
+		#self.consumidor.start()
 		
 	def socketActualizaTablaPaginas(self,senial):
 		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
 		indice = QtWidgets.QTableWidgetItem(str(senial["indice"]))
-		self.tablaPaginas.setItem(senial["fila"],0,proceso)
-		self.tablaPaginas.setItem(senial["fila"],1,indice)
+		numeroMarco = QtWidgets.QTableWidgetItem(str(senial["numeroMarco"]))
+		enRAM = QtWidgets.QTableWidgetItem(str(senial["RAM"]))
+		if senial["funcion"] == "agregar":
+			self.tablaPaginas.insertRow(self.tablaPaginas.rowCount())
+			self.tablaPaginas.setItem(self.tablaPaginas.rowCount()-1,0,proceso)
+			self.tablaPaginas.setItem(self.tablaPaginas.rowCount()-1,1,indice)
+			self.tablaPaginas.setItem(self.tablaPaginas.rowCount()-1,2,numeroMarco)
+			self.tablaPaginas.setItem(self.tablaPaginas.rowCount()-1,3,enRAM)
 
 	def socketPintarTablaMemoria(self,senial):
-		self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
+		if senial["RAM"]==1:
+			self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
+		else:
+			self.tablaVirtual.setItem(senial["fila"],senial["columna"],senial["item"])
 
 	def socketBarra(self,senial):
 		self.label_3.setText("Proceso: "+str(senial["idProceso"]))
