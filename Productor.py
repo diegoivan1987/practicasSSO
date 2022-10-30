@@ -48,6 +48,8 @@ class Productor(QtCore.QThread):
 						for i in range(self.tablaPaginas.rowCount()):	
 							if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
 									posicionMarco = int(self.tablaPaginas.item(i,2).text())
+									procesoActual.marcos.append(posicionMarco)
+									print("Proceso "+str(procesoActual.id)+" en marco "+str(posicionMarco))
 									for j in range(8):
 										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
 											columna = QtWidgets.QTableWidgetItem("")

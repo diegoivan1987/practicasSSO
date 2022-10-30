@@ -10,8 +10,10 @@ import sys
 
 class Proceso():
 		id = 0
-		tamanio = 0
+		tamanio = 0 #solo para cuestiones graficas
+		porcentajeProcesado = 0
 		color = []
+		marcos = []#marcos en memoria fisica que ocupa
 
 		def __init__(self,id,tamanio,color):
 				self.id = id
@@ -27,13 +29,13 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.procesosEnMemoria = []
 
 		#inicializamos los arreglos de procesos y sus datos
-		for i in range(20):
-			agregar = Proceso(i+1,randint(1,24),[randint(0,255),randint(0,255),randint(0,255)])
+		for i in range(5):
+			agregar = Proceso(i+1,randint(9,14),[randint(0,255),randint(0,255),randint(0,255)])
 			self.procesosPendientes.append(agregar)
 
 
 		#llenamos la tabla de pendientes
-		for i in range(20):
+		for i in range(len(self.procesosPendientes)):
 			self.tablaPendientes.insertRow(self.tablaPendientes.rowCount())
 			id = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].id))
 			tamanio = QtWidgets.QTableWidgetItem(str(self.procesosPendientes[i].tamanio))
