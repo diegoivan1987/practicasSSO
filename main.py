@@ -81,9 +81,12 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.barra.setValue(senial["porcentajeBarra"])
 
 	def socketQuitarDeTablaPendientes(self,senial):
+		#se hace hardcodeado porque si me pongo a remover por el id del proceso, por algun motivo al obtener el texto de la celda me da error
 		if senial[0] == 1:
-			print("se removio el proceso "+str(senial[1]))
-			self.tablaPendientes.removeRow(senial[1]-1)#como usamos una lista FIFO, siempre se va a terminar el primer proceso en la lista, por lo tanto, siempre quitamos el primero de la tabla
+			if senial[1] == 1 or senial[1] == 2:
+				self.tablaPendientes.removeRow(0)
+			else:
+				self.tablaPendientes.removeRow(1)
 				
 	def socketAgregarATerminados(self,senial):
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
