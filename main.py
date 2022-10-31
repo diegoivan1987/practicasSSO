@@ -2,6 +2,8 @@
 from random import randint
 from PyQt5 import QtWidgets
 from PyQt5 import uic
+from Manejador import Manejador
+from PyQt5.QtGui import  QColor
 
 from Productor import Productor
 from Consumidor import Consumidor
@@ -45,6 +47,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.paginasDisponibles = [10]#tamanio total de la tabla de paginas
 		self.semaforoProductor = [True]
 		self.semaforoConsumidor  =[False]
+		self.semaforoManejador  =[False]
 			
 		self.btnI.clicked.connect(self.correr)
 
@@ -52,14 +55,17 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
-		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
+		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.semaforoManejador)
 		self.consumidor.actualizarBarra.connect(self.socketBarra)
 		self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
 		self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
 		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
+		#self.manejador = Manejador(self.semaforoManejador,self.semaforoConsumidor)
+		#self.manejador.pintarLabel.connect(self.socketPintarLabel)
 		self.productor.start()
 		self.consumidor.start()
+		#self.manejador.start()
 		
 	def socketActualizaTablaPaginas(self,senial):
 		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
@@ -75,13 +81,19 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.barra.setValue(senial["porcentajeBarra"])
 
 	def socketQuitarDeTablaPendientes(self,senial):
-		if senial == 1:
-			self.tablaPendientes.removeRow(0)#como usamos una lista FIFO, siempre se va a terminar el primer proceso en la lista, por lo tanto, siempre quitamos el primero de la tabla
+		if senial[0] == 1:
+			print("se removio el proceso "+str(senial[1]))
+			self.tablaPendientes.removeRow(senial[1]-1)#como usamos una lista FIFO, siempre se va a terminar el primer proceso en la lista, por lo tanto, siempre quitamos el primero de la tabla
 				
 	def socketAgregarATerminados(self,senial):
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
 		id = QtWidgets.QTableWidgetItem(str(senial))
 		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,id)
+
+	def socketPintarLabel(self,senial):
+		color = QColor(150,60,150)
+		if senial == 1:
+			self.lbManejador.setStyleSheet("foreground-color: red")
 
 #Iniciamos la aplicacion en bucle
 app = QtWidgets.QApplication(sys.argv)
