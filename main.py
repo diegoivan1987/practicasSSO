@@ -2,6 +2,7 @@
 from random import randint
 from PyQt5 import QtWidgets
 from PyQt5 import uic
+from Controlador import Controlador
 from Manejador import Manejador
 from PyQt5.QtGui import  QColor
 
@@ -48,6 +49,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.semaforoProductor = [True]
 		self.semaforoConsumidor  =[False]
 		self.semaforoManejador  =[False]
+		self.semaforoControlador = [False]
 			
 		self.btnI.clicked.connect(self.correr)
 
@@ -61,11 +63,14 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
 		self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
 		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
-		self.manejador = Manejador(self.semaforoManejador,self.semaforoConsumidor)
+		self.manejador = Manejador(self.semaforoManejador,self.semaforoControlador,self.procesosEnMemoria)
 		self.manejador.pintarLabel.connect(self.socketPintarLabel)
+		self.controlador = Controlador(self.semaforoControlador,self.semaforoManejador)
+		self.controlador.aumentarControlador.connect(self.socketAumentarControlador)
 		self.productor.start()
 		self.consumidor.start()
 		self.manejador.start()
+		self.controlador.start()
 		
 	def socketActualizaTablaPaginas(self,senial):
 		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
@@ -99,6 +104,16 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 			self.lbManejador.setStyleSheet("background-color: green")
 		else:
 			self.lbManejador.setStyleSheet("background-color: red")
+
+	def socketAumentarControlador(self,senial):
+		self.barraControlador.setValue(senial)
+
+	def socketAniadirInfo(self,senial):
+		color = QColor(senial["color"][0],senial["color"][1],senial["color"][2])
+		columna = QtWidgets.QTableWidgetItem("")
+		columna.setBackground(color)
+		self.tablaMemoria.setItem(senial["fila"],senial["columna"],columna)
+
 
 #Iniciamos la aplicacion en bucle
 app = QtWidgets.QApplication(sys.argv)

@@ -54,7 +54,7 @@ class Productor(QtCore.QThread):
 											columna = QtWidgets.QTableWidgetItem("")
 											columna.setBackground(color)
 											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
-											time.sleep(0.05)
+											time.sleep(0.1)
 											tamanioAuxiliar-=1
 				else:#si ya se terminaron todos los procesos pendientes, tambien sale del productor
 					self.semaforoProductor[0] = False

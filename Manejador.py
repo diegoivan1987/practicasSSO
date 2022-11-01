@@ -6,11 +6,15 @@ import time
 
 class Manejador(QtCore.QThread):
 	pintarLabel = QtCore.pyqtSignal(int)
+	aniadirInfo = QtCore.pyqtSignal(dict)
+	numeroPasadas = 0
 
-	def __init__(self,semaforoManejador,semaforoConsumidor):
+	def __init__(self,semaforoManejador,semaforoControlador,procesosEnMemoria):
 		super(Manejador, self).__init__(None)
 		self.semaforoManejador = semaforoManejador
-		self.semaforoConsumidor = semaforoConsumidor
+		self.semaforoControlador = semaforoControlador
+		self.numeroPasadas = 0
+		self.procesosEnMemoria = procesosEnMemoria
 
 	def run(self): 
 		while True:
@@ -20,3 +24,7 @@ class Manejador(QtCore.QThread):
 				self.pintarLabel.emit(0)
 				time.sleep(0.01)
 				self.semaforoManejador[0]  = False
+				if self.numeroPasadas == 0:
+					self.semaforoControlador[0] = True
+					self.primeraPasada = 1
+				
