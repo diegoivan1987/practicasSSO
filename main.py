@@ -61,11 +61,11 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.consumidor.quitarDeTablaPendientes.connect(self.socketQuitarDeTablaPendientes)
 		self.consumidor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
 		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
-		#self.manejador = Manejador(self.semaforoManejador,self.semaforoConsumidor)
-		#self.manejador.pintarLabel.connect(self.socketPintarLabel)
+		self.manejador = Manejador(self.semaforoManejador,self.semaforoConsumidor)
+		self.manejador.pintarLabel.connect(self.socketPintarLabel)
 		self.productor.start()
 		self.consumidor.start()
-		#self.manejador.start()
+		self.manejador.start()
 		
 	def socketActualizaTablaPaginas(self,senial):
 		proceso = QtWidgets.QTableWidgetItem(str(senial["proceso"]))
@@ -96,7 +96,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 	def socketPintarLabel(self,senial):
 		color = QColor(150,60,150)
 		if senial == 1:
-			self.lbManejador.setStyleSheet("foreground-color: red")
+			self.lbManejador.setStyleSheet("background-color: green")
+		else:
+			self.lbManejador.setStyleSheet("background-color: red")
 
 #Iniciamos la aplicacion en bucle
 app = QtWidgets.QApplication(sys.argv)

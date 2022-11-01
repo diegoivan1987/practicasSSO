@@ -13,6 +13,10 @@ class Manejador(QtCore.QThread):
 		self.semaforoConsumidor = semaforoConsumidor
 
 	def run(self): 
-            while True:
-                if self.semaforoManejador[0] == True:
-                    self.semaforoManejador[0]  = False
+		while True:
+			if self.semaforoManejador[0] == True:
+				self.pintarLabel.emit(1)
+				time.sleep(2)
+				self.pintarLabel.emit(0)
+				time.sleep(0.01)
+				self.semaforoManejador[0]  = False

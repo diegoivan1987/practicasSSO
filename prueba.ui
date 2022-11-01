@@ -469,6 +469,9 @@
       <height>16</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: red</string>
+    </property>
     <property name="text">
      <string>Manejador</string>
     </property>
