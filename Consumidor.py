@@ -29,6 +29,7 @@ class Consumidor(QtCore.QThread):
 					if len(self.procesosEnMemoria)>0:
 						procesoActual = self.procesosEnMemoria.pop(0)
 						if procesoActual.id != 2:#cualquier proceso que no sea el 2
+							
 							#procesamos el proceso
 							while procesoActual.porcentajeProcesado < 100:
 								procesoActual.porcentajeProcesado += 100
@@ -65,9 +66,11 @@ class Consumidor(QtCore.QThread):
 								procesoActual.porcentajeProcesado += 1
 								self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":procesoActual.porcentajeProcesado})
 								time.sleep(0.05)
+							self.procesosEnMemoria.append(procesoActual)
 							#self.semaforoManejador[0] = True
 							
-						elif procesoActual.id == 2 and procesoActual.porcentajeProcesado != 0:
+						elif procesoActual.id == 2 and procesoActual.porcentajeProcesado != 0 and len(self.procesosEnMemoria)==0:
+							
 							#procesamos el proceso
 							while procesoActual.porcentajeProcesado < 100:
 								procesoActual.porcentajeProcesado += 1
