@@ -37,6 +37,7 @@ class Manejador(QtCore.QThread):
 							aux+=1
 							self.aniadirInfo.emit({"columna":aux,"color":color})
 							time.sleep(0.1)
+							proceso.tamanio += 2
 							self.numeroPasadas +=1
 				if self.numeroPasadas == 0:
 					self.semaforoControlador[0] = True

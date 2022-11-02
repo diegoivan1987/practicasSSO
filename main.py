@@ -95,6 +95,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 				self.tablaPendientes.removeRow(1)
 				
 	def socketAgregarATerminados(self,senial):
+		
 		self.tablaTerminados.insertRow(self.tablaTerminados.rowCount())
 		id = QtWidgets.QTableWidgetItem(str(senial))
 		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,id)
@@ -110,6 +111,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.barraControlador.setValue(senial)
 
 	def socketAniadirInfo(self,senial):
+		print("se aniadio info en 2,"+ str(senial["columna"]))
 		columna = QtWidgets.QTableWidgetItem("")
 		columna.setBackground(senial["color"])
 		self.tablaMemoria.setItem(2,senial["columna"],columna)
