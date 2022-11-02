@@ -32,7 +32,7 @@ class Consumidor(QtCore.QThread):
 							
 							#procesamos el proceso
 							while procesoActual.porcentajeProcesado < 100:
-								procesoActual.porcentajeProcesado += 100
+								procesoActual.porcentajeProcesado += 1
 								self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":procesoActual.porcentajeProcesado})
 								time.sleep(0.05)
 							#quitarlo de pendientes
@@ -63,7 +63,7 @@ class Consumidor(QtCore.QThread):
 						elif procesoActual.id == 2 and procesoActual.porcentajeProcesado == 0:#la primera vez que se entra el procesamiento del proceso 2
 							#procesamos el proceso
 							while procesoActual.porcentajeProcesado < 50:
-								procesoActual.porcentajeProcesado += 50
+								procesoActual.porcentajeProcesado += 1
 								self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":procesoActual.porcentajeProcesado})
 								time.sleep(0.05)
 							self.procesosEnMemoria.append(procesoActual)
@@ -91,6 +91,8 @@ class Consumidor(QtCore.QThread):
 												self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
 												time.sleep(0.05)
 												tamanioAuxiliar-=1
+							#mandar señal a manejador para que empiece la escritura en dispositivo e/s
+							self.semaforoManejador[0]=True
 							#sobreescribir tabla de paginas
 							for i in range(self.tablaPaginas.rowCount()):#recorremos la tabla de paginas
 								if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):

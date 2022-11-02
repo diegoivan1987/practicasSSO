@@ -4,6 +4,7 @@ import time
 
 class Controlador(QtCore.QThread):
 	aumentarControlador = QtCore.pyqtSignal(int)
+	cambiarLabelInstruccion = QtCore.pyqtSignal(str)
 
 	def __init__(self,semaforoControlador,semaforoManejador):
 		super(Controlador, self).__init__(None)
@@ -13,10 +14,12 @@ class Controlador(QtCore.QThread):
 	def run(self): 
 		while True:
 			if self.semaforoControlador[0] == True:
-				for i in range(1,101):
+				for i in range(1,101,5):
 					self.aumentarControlador.emit(i)
 					time.sleep(0.01)
 				self.aumentarControlador.emit(0)
+				time.sleep(0.01)
+				self.cambiarLabelInstruccion.emit(" ")
 				time.sleep(0.01)
 				self.semaforoControlador[0]  = False
 				self.semaforoManejador[0] = True

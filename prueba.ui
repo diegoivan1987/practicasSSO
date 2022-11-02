@@ -463,8 +463,8 @@
    <widget class="QLabel" name="lbManejador">
     <property name="geometry">
      <rect>
-      <x>690</x>
-      <y>40</y>
+      <x>670</x>
+      <y>20</y>
       <width>61</width>
       <height>16</height>
      </rect>
@@ -492,9 +492,9 @@
    <widget class="QLabel" name="lbInstruccion">
     <property name="geometry">
      <rect>
-      <x>770</x>
+      <x>740</x>
       <y>60</y>
-      <width>61</width>
+      <width>131</width>
       <height>16</height>
      </rect>
     </property>
