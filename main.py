@@ -66,6 +66,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.manejador = Manejador(self.semaforoManejador,self.semaforoControlador,self.procesosEnMemoria)
 		self.manejador.pintarLabel.connect(self.socketPintarLabel)
 		self.manejador.aniadirInfo.connect(self.socketAniadirInfo)
+		self.manejador.actualizarTablaPendientes.connect(self.socketActualizarTablaPendientes)
 		self.controlador = Controlador(self.semaforoControlador,self.semaforoManejador)
 		self.controlador.aumentarControlador.connect(self.socketAumentarControlador)
 		self.productor.start()
@@ -101,7 +102,6 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.tablaTerminados.setItem(self.tablaTerminados.rowCount()-1,0,id)
 
 	def socketPintarLabel(self,senial):
-		color = QColor(150,60,150)
 		if senial == 1:
 			self.lbManejador.setStyleSheet("background-color: green")
 		else:
@@ -115,6 +115,10 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		columna = QtWidgets.QTableWidgetItem("")
 		columna.setBackground(senial["color"])
 		self.tablaMemoria.setItem(2,senial["columna"],columna)
+
+	def socketActualizarTablaPendientes(self,senial):
+		tamanio = QtWidgets.QTableWidgetItem(senial)
+		self.tablaPendientes.setItem(0,1,tamanio)
 
 
 #Iniciamos la aplicacion en bucle

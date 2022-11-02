@@ -7,6 +7,7 @@ import time
 class Manejador(QtCore.QThread):
 	pintarLabel = QtCore.pyqtSignal(int)
 	aniadirInfo = QtCore.pyqtSignal(dict)
+	actualizarTablaPendientes = QtCore.pyqtSignal(str)
 	numeroPasadas = 0
 
 	def __init__(self,semaforoManejador,semaforoControlador,procesosEnMemoria):
@@ -38,6 +39,8 @@ class Manejador(QtCore.QThread):
 							self.aniadirInfo.emit({"columna":aux,"color":color})
 							time.sleep(0.1)
 							proceso.tamanio += 2
+							self.actualizarTablaPendientes.emit(str(proceso.tamanio))
+							time.sleep(0.05)
 							self.numeroPasadas +=1
 				if self.numeroPasadas == 0:
 					self.semaforoControlador[0] = True
