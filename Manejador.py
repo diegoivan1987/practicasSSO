@@ -20,7 +20,7 @@ class Manejador(QtCore.QThread):
 	def run(self): 
 		while True:
 			if self.semaforoManejador[0] == True:
-				if self.numeroPasadas <4:
+				if self.numeroPasadas == 0 or self.numeroPasadas == 1 or self.numeroPasadas == 3:
 					self.pintarLabel.emit(1)
 					time.sleep(2)
 					self.pintarLabel.emit(0)
@@ -44,6 +44,7 @@ class Manejador(QtCore.QThread):
 							time.sleep(0.1)
 							proceso.tamanio += 2
 							self.numeroPasadas +=1
+							self.semaforoManejador[0]  = False
 				if self.numeroPasadas == 1:
 					self.cambiarLabelInstruccion.emit("Transfiriendo a memoria")
 					time.sleep(0.01)
