@@ -24,7 +24,22 @@ class Manejador(QtCore.QThread):
 				self.pintarLabel.emit(0)
 				time.sleep(0.01)
 				self.semaforoManejador[0]  = False
+				if self.numeroPasadas == 1:
+					for proceso in self.procesosEnMemoria:
+						if proceso.id == 2:
+							aux = 0
+							for i in range(proceso.tamanio):
+								aux+=1
+							#no se porque motivo es la fila 2 y tampoco se porque no manda los marcos adecuados, por eso esta harcodeado
+							color = QColor(proceso.color[0],proceso.color[1],proceso.color[2])
+							self.aniadirInfo.emit({"columna":aux,"color":color})
+							time.sleep(0.1)
+							aux+=1
+							self.aniadirInfo.emit({"columna":aux,"color":color})
+							time.sleep(0.1)
+							self.numeroPasadas +=1
 				if self.numeroPasadas == 0:
 					self.semaforoControlador[0] = True
-					self.primeraPasada = 1
+					self.numeroPasadas = 1
 				
+

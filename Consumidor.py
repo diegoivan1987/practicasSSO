@@ -63,7 +63,7 @@ class Consumidor(QtCore.QThread):
 						elif procesoActual.id == 2 and procesoActual.porcentajeProcesado == 0:#la primera vez que se entra el procesamiento del proceso 2
 							#procesamos el proceso
 							while procesoActual.porcentajeProcesado < 50:
-								procesoActual.porcentajeProcesado += 1
+								procesoActual.porcentajeProcesado += 50
 								self.actualizarBarra.emit({"idProceso":procesoActual.id,"porcentajeBarra":procesoActual.porcentajeProcesado})
 								time.sleep(0.05)
 							self.procesosEnMemoria.append(procesoActual)

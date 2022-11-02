@@ -19,4 +19,4 @@ class Controlador(QtCore.QThread):
 				self.aumentarControlador.emit(0)
 				time.sleep(0.01)
 				self.semaforoControlador[0]  = False
-				#self.semaforoManejador[0] = True
+				self.semaforoManejador[0] = True

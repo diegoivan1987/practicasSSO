@@ -65,6 +65,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.consumidor.agregarATerminados.connect(self.socketAgregarATerminados)
 		self.manejador = Manejador(self.semaforoManejador,self.semaforoControlador,self.procesosEnMemoria)
 		self.manejador.pintarLabel.connect(self.socketPintarLabel)
+		self.manejador.aniadirInfo.connect(self.socketAniadirInfo)
 		self.controlador = Controlador(self.semaforoControlador,self.semaforoManejador)
 		self.controlador.aumentarControlador.connect(self.socketAumentarControlador)
 		self.productor.start()
@@ -109,10 +110,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.barraControlador.setValue(senial)
 
 	def socketAniadirInfo(self,senial):
-		color = QColor(senial["color"][0],senial["color"][1],senial["color"][2])
 		columna = QtWidgets.QTableWidgetItem("")
-		columna.setBackground(color)
-		self.tablaMemoria.setItem(senial["fila"],senial["columna"],columna)
+		columna.setBackground(senial["color"])
+		self.tablaMemoria.setItem(2,senial["columna"],columna)
 
 
 #Iniciamos la aplicacion en bucle
