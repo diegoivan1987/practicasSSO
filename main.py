@@ -31,9 +31,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(10):
-			color1 = randint(0,255)
-			color2 = randint(0,255)
-			color3 = randint(0,255)
+			color1 = randint(50,255)
+			color2 = randint(50,255)
+			color3 = randint(50,255)
 			agregar = Proceso(i+1,randint(1,24),[color1,color2,color3],[color1-50,color2-50,color3-50])
 			self.procesosPendientes.append(agregar)
 
@@ -59,6 +59,8 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.numeroMarcoFisico,self.numeroMarcoVirtual)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
+		self.productor.pintarTablaMemoriaVirtual.connect(self.socketPintarTablaMemoriaVirtual)
+
 		#self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.indiceMarcoActual)
 		#self.consumidor.actualizarBarra.connect(self.socketBarra)
 		#self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
@@ -83,7 +85,11 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 	def socketPintarTablaMemoria(self,senial):
 		if senial["RAM"]==1:
 			self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
-		else:
+	
+	def socketPintarTablaMemoriaVirtual(self,senial):
+		if senial["RAM"]==0:
+			print("jodete")
+			print("Proceso "+str(senial["id"])+" marco "+str(senial["fila"])+" columna "+str(senial["columna"]))
 			self.tablaVirtual.setItem(senial["fila"],senial["columna"],senial["item"])
 
 	def socketBarra(self,senial):

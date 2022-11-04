@@ -7,6 +7,7 @@ import time
 class Productor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
 	pintarTablaMemoria = QtCore.pyqtSignal(dict)
+	pintarTablaMemoriaVirtual = QtCore.pyqtSignal(dict)
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria,numeroMarcoFisico,numeroMarcoVirtual):
 		super(Productor, self).__init__(None)
@@ -50,33 +51,35 @@ class Productor(QtCore.QThread):
 							self.numeroMarcoVirtual[0] += 1
 							
 						indiceAuxiliar+=1
-					#pintamos la memoria de acuerdo a la tabla de paginas
+					#pintamos la memoria fisica de acuerdo a la tabla de paginas
 					tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
 					color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
-					colorVirtual = QColor(procesoActual.colorVirtual[0],procesoActual.colorVirtual[1],procesoActual.colorVirtual[2])
-					for i in range(self.tablaPaginas.rowCount()):	
+					for i in range(self.tablaPaginas.rowCount()):
+						posicionMarco = int(self.tablaPaginas.item(i,2).text())	
 						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
-								posicionMarco = int(self.tablaPaginas.item(i,2).text())
-								if self.tablaPaginas.item(i,3).text() == "1":#si es un marco de memoria fisica
-									for j in range(8):
-										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
-											columna = QtWidgets.QTableWidgetItem("")
-											columna.setBackground(color)
-											columnaVirtual = QtWidgets.QTableWidgetItem("")
-											columnaVirtual.setBackground(colorVirtual)
-											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna,"RAM":1})
-											time.sleep(0.05)
-											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columnaVirtual,"RAM":0})
-											time.sleep(0.05)
-											tamanioAuxiliar-=1
-								else:#las demas paginas van en memoria virtual
-									for j in range(8):
-										if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
-											columna = QtWidgets.QTableWidgetItem("")
-											columna.setBackground(color)
-											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna,"RAM":0})
-											time.sleep(0.05)
-											tamanioAuxiliar-=1
+							if self.tablaPaginas.item(i,3).text() == "1":#si es un marco de memoria fisica
+								for j in range(8):
+									if tamanioAuxiliar>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
+										columna = QtWidgets.QTableWidgetItem("")
+										columna.setBackground(color)
+										self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna,"RAM":1})
+										time.sleep(0.05)
+										tamanioAuxiliar-=1
+					#pintamos la memoria virtual de acuerdo a la tabla de paginas
+					tamanioAuxiliarVirtual = procesoActual.tamanio #servira para llenar la memoria virtual
+					colorVirtual = QColor(procesoActual.colorVirtual[0],procesoActual.colorVirtual[1],procesoActual.colorVirtual[2])
+					for i in range(0,self.tablaPaginas.rowCount(),1):
+						posicionMarco = int(self.tablaPaginas.item(i,2).text())	
+						if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
+							if self.tablaPaginas.item(i,3).text() == "0":#las demas paginas van en memoria virtual
+								for j in range(8):
+									if tamanioAuxiliarVirtual>0:#mientras no se haya pintado la misma cantidad de espacios que el tamanio del proceso
+										columna = QtWidgets.QTableWidgetItem("")
+										columna.setBackground(colorVirtual)
+										
+										self.pintarTablaMemoriaVirtual.emit({"id":procesoActual.id,"fila":posicionMarco,"columna":j,"item":columna,"RAM":0})
+										time.sleep(0.1)
+										tamanioAuxiliarVirtual-=1
 				else:#si ya se terminaron todos los procesos pendientes, tambien sale del productor
 					self.semaforoProductor[0] = False
 					self.semaforoConsumidor[0] = True
