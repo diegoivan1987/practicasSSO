@@ -1,4 +1,21 @@
 #ejecutar desde la carpeta, para que detecte el archivo de la interfaz grafica
+#pseudocodigo
+"""crear 5 procesos aleatorio que se cargen en memoria
+hacer su procesamiento normalmente
+uno de esos procesos va a tener una interrupcion, lo que hara que se pase a procesar el siguiente proceso
+esa interrupcion activara al manejador, el manejador mandara una señal al controlador del dispositivo simulado, 
+un disco duro, el manejador tambien quedara en espera
+el disco duro hace su proceso de busqueda, simple, con una barra de carga para que sea grafico
+una vez que el disco termine, manda una señal al manejador, que vuelve a encenderse
+el manejador agrega 2 bloques de memoria al marco del proceso que quedo pendiente
+el manejador se apaga
+se continua el procesamiento del proceso pendiente
+una vez termina, se vuelve a llamar una interrupcion, que enciende el manejador
+el manejador manda informacion al controlador del disco
+el manejador se apaga
+el disco simula la escritura con una barra de carga
+una vez termina la barra de carga
+en caso de que haya mas procesos pendientes, se continua con ellos"""
 from random import randint
 from PyQt5 import QtWidgets
 from PyQt5 import uic
