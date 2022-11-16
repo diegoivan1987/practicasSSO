@@ -44,10 +44,7 @@ class Productor(QtCore.QThread):
 									self.paginasDisponibles[0] -= 1
 									break
 						#pintamos la memoria fisica de acuerdo a la tabla de paginas
-						if procesoActual.id == 2:
-							tamanioAuxiliar = procesoActual.tamanio - 2#le restamos 2 porque esos 2 son los que iran al buffer
-						else:
-							tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
+						tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
 						color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
 						for i in range(self.tablaPaginas.rowCount()):	
 							if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
