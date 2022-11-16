@@ -8,6 +8,8 @@ class Manejador(QtCore.QThread):
 	pintarLabel = QtCore.pyqtSignal(int)
 	cambiarLabelInstruccion = QtCore.pyqtSignal(str)
 	aniadirInfo = QtCore.pyqtSignal(dict)
+	pintarTablaBufferRam = QtCore.pyqtSignal(dict)
+	pintarTablaBufferControlador = QtCore.pyqtSignal(dict)
 	numeroPasadas = 0
 
 	def __init__(self,semaforoManejador,semaforoControlador,procesosEnMemoria):
@@ -50,10 +52,28 @@ class Manejador(QtCore.QThread):
 					time.sleep(0.01)
 					self.semaforoControlador[0]=True
 					self.numeroPasadas+=1
-					
-					
 				if self.numeroPasadas == 0:
-					self.cambiarLabelInstruccion.emit("Leyendo")
+					#prendemos el manejador
+					self.pintarLabel.emit(1)
+					time.sleep(0.01)
+					#hacemos la transferencia
+					blanco = QColor(255,255,255)
+					color = QColor(255,128,0)
+					for i in range(2):
+						columna = QtWidgets.QTableWidgetItem("")
+						columna.setBackground(blanco)
+						self.pintarTablaBufferRam.emit({"fila":0,"columna":i,"item":columna})
+						time.sleep(0.1)
+						columna = QtWidgets.QTableWidgetItem("")
+						columna.setBackground(color)
+						self.pintarTablaBufferControlador.emit({"fila":0,"columna":i,"item":columna})
+						time.sleep(0.1)
+					#apagamos el manejador
+					self.pintarLabel.emit(0)
+					time.sleep(0.01)
+					self.semaforoManejador[0]  = False
+
+					self.cambiarLabelInstruccion.emit("Checksum")
 					time.sleep(0.01)
 					self.semaforoControlador[0] = True
 					self.numeroPasadas+=1

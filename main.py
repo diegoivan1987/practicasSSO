@@ -85,6 +85,8 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.manejador.pintarLabel.connect(self.socketPintarLabel)
 		self.manejador.aniadirInfo.connect(self.socketAniadirInfo)
 		self.manejador.cambiarLabelInstruccion.connect(self.socketCambiarLabelInstruccion)
+		self.manejador.pintarTablaBufferRam.connect(self.socketPintarTablaBufferRam)
+		self.manejador.pintarTablaBufferControlador.connect(self.socketPintarTablaBufferControlador)
 		self.controlador = Controlador(self.semaforoControlador,self.semaforoManejador)
 		self.controlador.aumentarControlador.connect(self.socketAumentarControlador)
 		self.controlador.cambiarLabelInstruccion.connect(self.socketCambiarLabelInstruccion)
@@ -104,6 +106,10 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		
 	def socketPintarTablaBufferRam(self,senial):
 		self.tablaBufferRam.setItem(senial["fila"],senial["columna"],senial["item"])
+
+	def socketPintarTablaBufferControlador(self,senial):
+		self.tablaBufferControlador.setItem(senial["fila"],senial["columna"],senial["item"])
+
 
 	def socketBarra(self,senial):
 		self.label_3.setText("Proceso: "+str(senial["idProceso"]))
