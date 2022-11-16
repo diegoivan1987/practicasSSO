@@ -16,7 +16,7 @@ class Controlador(QtCore.QThread):
 			if self.semaforoControlador[0] == True:
 				for i in range(1,101,5):
 					self.aumentarControlador.emit(i)
-					time.sleep(0.01)
+					time.sleep(0.1)
 				self.aumentarControlador.emit(0)
 				time.sleep(0.01)
 				self.cambiarLabelInstruccion.emit(" ")

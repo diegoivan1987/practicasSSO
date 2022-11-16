@@ -62,7 +62,6 @@ class Productor(QtCore.QThread):
 											tamanioAuxiliar-=1
 									if self.tablaPaginas.item(i,0).text()== str(2) and tamanioAuxiliar == 0:#si ya se termino de llenar la tabla de memoria del proceso 2, seguimos con el buffer
 										for j in range(2):
-											print("fuck")
 											columna = QtWidgets.QTableWidgetItem("")
 											columna.setBackground(color)
 											self.pintarTablaBufferRam.emit({"fila":0,"columna":j,"item":columna})
