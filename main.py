@@ -50,7 +50,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(5):
-			agregar = Proceso(i+1,randint(11,16),[randint(0,255),randint(0,255),randint(0,255)])
+			agregar = Proceso(i+1,randint(9,13),[randint(0,255),randint(0,255),randint(0,255)])
 			self.procesosPendientes.append(agregar)
 
 
