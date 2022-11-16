@@ -50,7 +50,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 		#inicializamos los arreglos de procesos y sus datos
 		for i in range(5):
-			agregar = Proceso(i+1,randint(9,14),[randint(0,255),randint(0,255),randint(0,255)])
+			agregar = Proceso(i+1,randint(11,16),[randint(0,255),randint(0,255),randint(0,255)])
 			self.procesosPendientes.append(agregar)
 
 
@@ -74,6 +74,7 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 		self.productor = Productor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria)
 		self.productor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
 		self.productor.pintarTablaMemoria.connect(self.socketPintarTablaMemoria)
+		self.productor.pintarTablaBufferRam.connect(self.socketPintarTablaBufferRam)
 		self.consumidor = Consumidor(self.semaforoProductor,self.semaforoConsumidor,self.procesosPendientes,self.paginasDisponibles,self.tablaPaginas,self.tablaMemoria,self.procesosEnMemoria,self.semaforoManejador)
 		self.consumidor.actualizarBarra.connect(self.socketBarra)
 		self.consumidor.actualizaTablaPaginas.connect(self.socketActualizaTablaPaginas)
@@ -100,6 +101,9 @@ class VentanaPrincipal(QtWidgets.QMainWindow):
 
 	def socketPintarTablaMemoria(self,senial):
 		self.tablaMemoria.setItem(senial["fila"],senial["columna"],senial["item"])
+		
+	def socketPintarTablaBufferRam(self,senial):
+		self.tablaBufferRam.setItem(senial["fila"],senial["columna"],senial["item"])
 
 	def socketBarra(self,senial):
 		self.label_3.setText("Proceso: "+str(senial["idProceso"]))

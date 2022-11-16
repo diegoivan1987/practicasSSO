@@ -7,6 +7,7 @@ import time
 class Productor(QtCore.QThread):
 	actualizaTablaPaginas = QtCore.pyqtSignal(dict)
 	pintarTablaMemoria = QtCore.pyqtSignal(dict)
+	pintarTablaBufferRam = QtCore.pyqtSignal(dict)
 
 	def __init__(self,semaforoProductor,semaforoConsumidor,procesosPendientes,paginasDisponibles,tablaPaginas,tablaMemoria,procesosEnMemoria):
 		super(Productor, self).__init__(None)
@@ -43,7 +44,10 @@ class Productor(QtCore.QThread):
 									self.paginasDisponibles[0] -= 1
 									break
 						#pintamos la memoria fisica de acuerdo a la tabla de paginas
-						tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
+						if procesoActual.id == 2:
+							tamanioAuxiliar = procesoActual.tamanio - 2#le restamos 2 porque esos 2 son los que iran al buffer
+						else:
+							tamanioAuxiliar = procesoActual.tamanio#tamanio total del proceso que ira disminuyendo
 						color = QColor(procesoActual.color[0],procesoActual.color[1],procesoActual.color[2])
 						for i in range(self.tablaPaginas.rowCount()):	
 							if self.tablaPaginas.item(i,0).text()==str(procesoActual.id):
@@ -56,6 +60,13 @@ class Productor(QtCore.QThread):
 											self.pintarTablaMemoria.emit({"fila":posicionMarco,"columna":j,"item":columna})
 											time.sleep(0.1)
 											tamanioAuxiliar-=1
+									if self.tablaPaginas.item(i,0).text()== str(2) and tamanioAuxiliar == 0:#si ya se termino de llenar la tabla de memoria del proceso 2, seguimos con el buffer
+										for j in range(2):
+											print("fuck")
+											columna = QtWidgets.QTableWidgetItem("")
+											columna.setBackground(color)
+											self.pintarTablaBufferRam.emit({"fila":0,"columna":j,"item":columna})
+											time.sleep(0.1)
 				else:#si ya se terminaron todos los procesos pendientes, tambien sale del productor
 					self.semaforoProductor[0] = False
 					self.semaforoConsumidor[0] = True
